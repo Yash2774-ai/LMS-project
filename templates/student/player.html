@@ -1,0 +1,327 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 p-8">
+    <div class="max-w-5xl mx-auto bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+        
+        <!-- Header -->
+        <div class="mb-6 border-b pb-4">
+            <div class="flex justify-between items-start mb-3">
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-900">{{ module.title }}</h1>
+                    <p class="text-sm text-gray-500 mt-1">Minimum watch requirement: {{ min_watch_percent|default:"80" }}%</p>
+                </div>
+                <!-- Debug Info (Development Helper) -->
+                <div class="text-xs text-gray-400 bg-gray-50 p-2 rounded border border-gray-200">
+                    <div>Module ID: <span class="font-mono text-gray-600">{{ module_id }}</span></div>
+                    <div>Moodle CMID: <span class="font-mono text-gray-600">{{ moodle_cmid }}</span></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Error State: No Video URL -->
+        {% if not mpd_url %}
+        <div class="bg-red-50 border-l-4 border-red-500 p-4 mb-6 rounded-md">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <svg class="h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                    </svg>
+                </div>
+                <div class="ml-3">
+                    <h3 class="text-sm font-semibold text-red-800 mb-1">Video Not Available</h3>
+                    <p class="text-sm text-red-700">The video stream for this module is not yet available. Please ask your instructor to upload the video.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Fallback UI -->
+        <div class="aspect-video bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl flex items-center justify-center shadow-inner mb-6">
+            <div class="text-center">
+                <svg class="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <p class="text-gray-500 font-medium">Video Unavailable</p>
+            </div>
+        </div>
+
+        <!-- Back Link -->
+        <a href="javascript:history.back()" class="inline-flex items-center px-4 py-2 text-sm font-medium text-blue-600 hover:text-blue-700 transition">
+            ← Back to Course
+        </a>
+
+        {% else %}
+
+        <!-- Video Player (DASH.js) -->
+        <div class="aspect-video bg-black rounded-xl overflow-hidden relative shadow-inner mb-6">
+            <video id="videoPlayer" controls class="w-full h-full"></video>
+        </div>
+        <p class="text-sm text-gray-600 mb-4">
+            Last watched: <span id="lastWatchedTime" class="font-mono">{{ last_position_seconds|floatformat:0 }}</span> sec
+        </p>
+
+        <!-- Completion Status -->
+        {% if is_completed %}
+        <div class="mb-6 p-4 bg-green-50 border-l-4 border-green-500 rounded-md">
+            <p class="text-green-700 font-bold flex items-center">
+                <span class="mr-2">✔</span> Module Completed
+            </p>
+        </div>
+        {% endif %}
+
+        <!-- Progress Bar -->
+        <div class="mb-6 {% if is_completed %}opacity-50{% endif %}">
+            <div class="flex justify-between items-center mb-2">
+                <span class="text-sm font-semibold text-gray-700">Course Progress</span>
+                <span id="progressText" class="text-sm font-bold text-blue-600">{{ watch_percent|floatformat:0 }}%</span>
+            </div>
+            <div class="w-full bg-gray-200 rounded-full h-2.5 overflow-hidden">
+                <div id="progressBar" class="bg-blue-600 h-2.5 rounded-full transition-all duration-300 ease-out" 
+                     style="width: {{ watch_percent|floatformat:0 }}%"></div>
+            </div>
+            <p class="text-xs text-gray-500 mt-1">
+                Watch at least {{ min_watch_percent|default:"80" }}% of the video to complete this module
+            </p>
+        </div>
+        
+        <!-- Completion Notification -->
+        <div id="completionStatus" class="hidden mb-6 p-4 bg-green-50 text-green-700 rounded-lg text-sm font-medium border border-green-200 flex items-center">
+            <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+            </svg>
+            ✔ You have reached the required watch time for this module.
+        </div>
+        
+        <!-- DASH Player & Tracking Logic -->
+        <script src="https://cdn.dashjs.org/latest/dash.all.min.js"></script>
+        <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var video = document.getElementById("videoPlayer");
+            
+            if (!video) {
+                console.error("Video element not found");
+                return;
+            }
+            
+            // Django Context Variables (Safely Escaped)
+            var mpdUrl = "{{ mpd_url|escapejs }}";
+            var moduleId = {{ module_id|default:"0" }};
+            var moodleCmid = {{ moodle_cmid|default:"0" }};
+            var minWatchPercent = parseFloat("{{ min_watch_percent|default:80 }}");
+            var csrftoken = getCookie('csrftoken');
+            
+            console.log("=== DASH Player Initialized ===");
+            console.log("Module ID:", moduleId);
+            console.log("Moodle CMID:", moodleCmid);
+            console.log("MPD URL:", mpdUrl);
+            console.log("Min Watch %:", minWatchPercent);
+            
+            // Validate MPD URL
+            if (!mpdUrl || !mpdUrl.includes(".mpd")) {
+                console.error("ERROR: Invalid or missing DASH stream URL");
+                recordPlayerError("Invalid MPD URL: " + mpdUrl);
+                return;
+            }
+
+            // Initialize DASH.js Player
+            try {
+                var player = dashjs.MediaPlayer().create();
+                player.initialize(video, mpdUrl, false);
+                player.updateSettings({
+                    'streaming': {
+                        'failoverFormatSelection': true
+                    }
+                });
+                console.log("DASH player initialized successfully");
+            } catch (e) {
+                console.error("Failed to initialize DASH player:", e);
+                recordPlayerError("DASH init error: " + e.message);
+                return;
+            }
+            
+            // State tracking variables
+            var maxTimeWatched = 0;
+            var completionTriggered = false;
+            var lastProgressSent = 0;
+            var videoInfo = {
+                duration: 0,
+                startTime: Date.now(),
+                errorCount: 0
+            };
+            
+            // UI Elements
+            var progressBar = document.getElementById('progressBar');
+            var progressText = document.getElementById('progressText');
+            var completionStatus = document.getElementById('completionStatus');
+            
+            // Track errors
+            function recordPlayerError(msg) {
+                videoInfo.errorCount++;
+                console.error("[PlayerError] " + msg);
+            }
+
+            video.addEventListener('loadedmetadata', function() {
+                videoInfo.duration = video.duration;
+                console.log("Video loaded. Duration:", videoInfo.duration + "s");
+            });
+
+            video.addEventListener('error', function() {
+                recordPlayerError("Video playback error: " + video.error.code);
+            });
+
+            // 1. Prevent Skip Ahead (Sequential Watching)
+            video.addEventListener('seeking', function() {
+                // Allow small buffer (1 sec) for UI precision
+                if (video.currentTime > maxTimeWatched + 1) {
+                    console.warn("Seek blocked: " + video.currentTime + "s > " + maxTimeWatched + "s");
+                    video.currentTime = maxTimeWatched;
+                }
+            });
+
+            // 2. Track actual watch time
+            video.addEventListener('timeupdate', function() {
+                if (!video.seeking && video.currentTime > maxTimeWatched) {
+                    maxTimeWatched = video.currentTime;
+                }
+                updateProgressUI();
+            });
+
+            // 3. Prevent Speed Changes
+            video.addEventListener('ratechange', function() {
+                if (video.playbackRate !== 1.0) {
+                    console.warn("Speed change blocked. Setting to 1.0x");
+                    video.playbackRate = 1.0;
+                }
+            });
+
+            // Update progress display and send analytics
+            function updateProgressUI() {
+                if (!video.duration || video.duration === 0) return;
+                
+                var percent = (maxTimeWatched / video.duration) * 100;
+                var displayPercent = Math.min(100, Math.floor(percent));
+                
+                // Update progress bar
+                progressBar.style.width = displayPercent + "%";
+                progressText.innerText = displayPercent + "%";
+
+                // Throttled progress reporting (every 5 seconds)
+                var now = Date.now();
+                if (now - lastProgressSent >= 5000) {
+                    lastProgressSent = now;
+                    sendProgressToBackend(displayPercent);
+                }
+
+                // Check for completion
+                if (!completionTriggered && displayPercent >= minWatchPercent) {
+                    triggerCompletion();
+                }
+            }
+            
+            // Notify backend of watch progress
+            function sendProgressToBackend(percent) {
+                if (!csrftoken) {
+                    console.warn("CSRF token not found");
+                    return;
+                }
+
+                fetch('/api/video-progress/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrftoken
+                    },
+                    body: JSON.stringify({ 
+                        cmid: moodleCmid, 
+                        watch_percent: percent 
+                    })
+                })
+                .then(res => {
+                    if (!res.ok) {
+                        recordPlayerError("Progress update failed: " + res.status);
+                    }
+                })
+                .catch(err => recordPlayerError("Progress fetch error: " + err.message));
+            }
+
+            // Trigger completion state
+            function triggerCompletion() {
+                completionTriggered = true;
+                completionStatus.classList.remove('hidden');
+                console.log("Completion triggered at " + Math.floor((maxTimeWatched / video.duration) * 100) + "%");
+                
+                // Notify backend
+                fetch('/student/api/video-complete/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrftoken
+                    },
+                    body: JSON.stringify({ module_id: moduleId })
+                })
+                .then(res => {
+                    if (!res.ok) throw new Error("Response " + res.status);
+                    console.log('Completion synced to backend');
+                })
+                .catch(err => recordPlayerError("Completion sync failed: " + err.message));
+            }
+
+            // Persist playback position every 5 seconds during playback
+            let savePositionInterval = null;
+
+            video.addEventListener('play', function() {
+                if (savePositionInterval) return;
+                
+                savePositionInterval = setInterval(function() {
+                    if (!video.paused && !video.ended && video.currentTime > 0) {
+                        fetch('/api/save-position/', {
+                            method: 'POST',
+                            credentials: 'same-origin',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRFToken': csrftoken
+                            },
+                            body: JSON.stringify({
+                                cmid: moodleCmid,
+                                seconds: video.currentTime
+                            })
+                        })
+                        .catch(err => console.warn('Position save failed:', err.message));
+                    }
+                }, 5000);
+            });
+
+            function clearSavePosition() {
+                if (savePositionInterval) {
+                    clearInterval(savePositionInterval);
+                    savePositionInterval = null;
+                }
+            }
+
+            video.addEventListener('pause', clearSavePosition);
+            video.addEventListener('ended', clearSavePosition);
+
+            // Extract CSRF token from cookies
+            function getCookie(name) {
+                var cookieValue = null;
+                if (document.cookie && document.cookie !== '') {
+                    var cookies = document.cookie.split(';');
+                    for (var i = 0; i < cookies.length; i++) {
+                        var cookie = cookies[i].trim();
+                        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                            break;
+                        }
+                    }
+                }
+                return cookieValue;
+            }
+
+            console.log("=== DASH Player Setup Complete ===");
+        });
+        </script>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

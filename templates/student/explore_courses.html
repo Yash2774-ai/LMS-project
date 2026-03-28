@@ -1,0 +1,120 @@
+{% extends 'base.html' %}
+
+{% block title %}Explore Courses | Adaptive Learning LMS{% endblock %}
+
+{% block navbar %}
+{% include 'partials/navbar_dashboard.html' %}
+<style>
+    .course-thumbnail {
+        width: 100%;
+        height: 192px; /* Matching h-48 */
+        object-fit: cover;
+        border-radius: 24px 24px 0 0; /* Matching rounded-3xl */
+    }
+    .default-course-thumbnail {
+        height: 192px;
+        background: linear-gradient(to bottom right, #3b82f6, #4f46e5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 3.75rem; /* text-6xl */
+        color: white;
+        position: relative;
+        overflow: hidden;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 flex">
+    <!-- Sidebar (Simplified for Explore Page) -->
+    <aside class="w-64 bg-white border-r border-gray-200 min-h-screen fixed left-0 top-0 bottom-0 pt-16 hidden md:block z-10">
+        <div class="px-6 py-4">
+            <h2 class="text-xs uppercase text-gray-400 font-bold tracking-wider mb-4">Discovery</h2>
+            <nav class="space-y-2">
+                <a href="{% url 'student_dashboard' %}" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl text-gray-600 hover:bg-gray-50 transition-colors">
+                    <span class="mr-3 text-lg">📊</span> Back to Dashboard
+                </a>
+                <a href="{% url 'student_dashboard' %}?section=my-courses" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl text-gray-600 hover:bg-gray-50 transition-colors">
+                    <span class="mr-3 text-lg">📚</span> My Courses
+                </a>
+            </nav>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 md:ml-64 p-8 transition-all">
+        <div class="max-w-7xl mx-auto">
+            <!-- Header -->
+            <div class="mb-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-900">Explore Courses</h1>
+                    <p class="text-gray-500 mt-1">Discover new learning opportunities and expand your skills.</p>
+                </div>
+                <div class="relative max-w-sm w-full">
+                    <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">🔍</span>
+                    <input type="text" placeholder="Search courses..." 
+                        class="w-full pl-11 pr-4 py-3 rounded-2xl border border-gray-100 bg-white shadow-sm focus:ring-2 focus:ring-blue-500 outline-none transition text-sm">
+                </div>
+            </div>
+
+            <!-- Course Grid -->
+            {% if courses %}
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {% for course in courses %}
+                <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-xl transition duration-300 flex flex-col group">
+                    <!-- Course Image/Icon -->
+                    {% if course.thumbnail %}
+                        <img src="{{ course.thumbnail }}" alt="{{ course.fullname }}" class="course-thumbnail">
+                    {% else %}
+                        <div class="default-course-thumbnail">
+                            <span class="relative z-10 transition-transform group-hover:scale-110 duration-500">🎓</span>
+                        </div>
+                    {% endif %}
+                    
+                    <div class="p-8 flex-1 flex flex-col">
+                        <div class="flex justify-between items-start mb-4">
+                            <h3 class="text-xl font-bold text-gray-900 leading-tight">{{ course.fullname }}</h3>
+                        </div>
+                        
+                        <p class="text-gray-500 text-sm mb-8 line-clamp-3">
+                            {{ course.summary|striptags|default:"Start your journey with this comprehensive course designed for all skill levels." }}
+                        </p>
+                        
+                        <div class="mt-auto pt-6 border-t border-gray-50 flex items-center justify-between">
+                            <div class="flex items-center text-gray-400 text-xs font-bold uppercase tracking-widest">
+                                <span class="mr-2">📂</span> ID: {{ course.id }}
+                            </div>
+                            
+                            <form method="POST" action="{% url 'student_enroll_course' course.id %}">
+                                {% csrf_token %}
+                                <button type="submit" 
+                                    class="bg-green-600 hover:bg-green-700 text-white font-bold py-2.5 px-6 rounded-xl shadow-md transition transform hover:-translate-y-0.5 active:scale-95 text-sm flex items-center">
+                                    Enroll Now
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <!-- Empty State -->
+            <div class="bg-white rounded-3xl p-20 text-center shadow-sm border border-gray-100">
+                <div class="text-6xl mb-6">🏝️</div>
+                <h3 class="text-xl font-bold text-gray-900 mb-2">No new courses available</h3>
+                <p class="text-gray-500">You've already enrolled in everything! Check back later for more.</p>
+                <div class="mt-8">
+                    <a href="{% url 'student_dashboard' %}?section=my-courses" class="text-blue-600 font-bold hover:underline">
+                        Go to My Courses →
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </main>
+</div>
+{% endblock %}
+
+{% block footer %}
+{% endblock %}

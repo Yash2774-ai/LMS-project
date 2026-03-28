@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+
+{% block title %}Admin Console | Restricted Access{% endblock %}
+
+{% block navbar %}
+<!-- No navbar on admin login for security/cleanliness -->
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-slate-950 flex items-center justify-center p-6 relative overflow-hidden">
+    <!-- Abstract Background Decor -->
+    <div class="absolute top-0 right-0 w-96 h-96 bg-blue-600/10 rounded-full blur-3xl -mr-48 -mt-48 animate-pulse">
+    </div>
+    <div class="absolute bottom-0 left-0 w-96 h-96 bg-purple-600/10 rounded-full blur-3xl -ml-48 -mb-48 animate-pulse"
+        style="animation-delay: 2s"></div>
+
+    <div
+        class="relative w-full max-w-md bg-slate-900/50 backdrop-blur-xl border border-slate-800 rounded-3xl shadow-2xl overflow-hidden">
+        <div class="p-8">
+            <div class="text-center mb-10">
+                <div
+                    class="inline-flex items-center justify-center w-16 h-16 bg-blue-500/10 rounded-2xl border border-blue-500/20 text-blue-400 text-3xl mb-6 shadow-inner">
+                    🛡️
+                </div>
+                <h1 class="text-2xl font-black text-white tracking-tight uppercase">Admin Console</h1>
+                <p class="text-slate-500 mt-2 text-sm">Secure Entry Protocol Required</p>
+            </div>
+
+            {% if messages %}
+            <div class="mb-6 space-y-2">
+                {% for message in messages %}
+                <div
+                    class="p-4 rounded-xl text-xs font-bold border {% if 'error' in message.tags %}bg-red-500/10 text-red-400 border-red-500/20{% else %}bg-green-500/10 text-green-400 border-green-500/20{% endif %}">
+                    {{ message }}
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <form method="POST" action="{% url 'admin_dashboard' %}" class="space-y-6">
+                {% csrf_token %}
+                <input type="hidden" name="login_source" value="admin_private">
+
+                <div class="space-y-2">
+                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Admin
+                        Identity</label>
+                    <div class="relative group">
+                        <span
+                            class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-blue-400 transition-colors">👤</span>
+                        <input type="text" name="username" required placeholder="Administrator ID"
+                            class="w-full bg-slate-800/50 border border-slate-700/50 rounded-2xl py-4 pl-12 pr-4 text-white placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all">
+                    </div>
+                </div>
+
+                <div class="space-y-2">
+                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Universal
+                        Key</label>
+                    <div class="relative group">
+                        <span
+                            class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-blue-400 transition-colors">🔑</span>
+                        <input type="password" name="password" required placeholder="••••••••"
+                            class="w-full bg-slate-800/50 border border-slate-700/50 rounded-2xl py-4 pl-12 pr-4 text-white placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all">
+                    </div>
+                </div>
+
+                <button type="submit"
+                    class="w-full bg-blue-600 hover:bg-blue-500 text-white font-black py-4 rounded-2xl shadow-lg shadow-blue-500/20 transition-all transform active:scale-[0.98] uppercase tracking-widest text-sm">
+                    Authenticate Session
+                </button>
+            </form>
+
+            <div class="mt-8 pt-8 border-t border-slate-800 text-center">
+                <a href="{% url 'home' %}" class="text-xs text-slate-500 hover:text-white transition-colors">
+                    ← Return to Public Terminal
+                </a>
+            </div>
+        </div>
+
+        <!-- Bottom Bar -->
+        <div class="bg-blue-600 h-1 w-full"></div>
+    </div>
+
+    <!-- Footer Branding -->
+    <div class="absolute bottom-8 text-center w-full">
+        <p class="text-[10px] text-slate-700 font-bold uppercase tracking-[0.3em]">Adaptive LMS Security Framework v2.0
+        </p>
+    </div>
+</div>
+{% endblock %}
+
+{% block footer %}
+{% endblock %}

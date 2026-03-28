@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+
+{% block title %}Contact | Adaptive Learning LMS{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-7xl mx-auto">
+        <div class="text-center mb-12">
+            <h1 class="text-3xl font-extrabold text-gray-900 sm:text-4xl">Contact Us</h1>
+            <p class="mt-4 text-lg text-gray-500">
+                Have questions or need support? Feel free to reach out to us anytime. We are here to help you learn
+                smarter.
+            </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+            <!-- Contact Form -->
+            <div class="bg-white py-8 px-6 shadow-xl rounded-2xl sm:px-10">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold text-gray-900">Send Us a Message</h2>
+                </div>
+                <form class="space-y-6" action="#" method="POST">
+                    {% csrf_token %}
+                    <div>
+                        <label for="name" class="sr-only">Your Name</label>
+                        <input type="text" name="name" id="name" required
+                            class="appearance-none block w-full px-3 py-3 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                            placeholder="Your Name">
+                    </div>
+
+                    <div>
+                        <label for="email" class="sr-only">Your Email</label>
+                        <input type="email" name="email" id="email" required
+                            class="appearance-none block w-full px-3 py-3 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                            placeholder="Your Email">
+                    </div>
+
+                    <div>
+                        <label for="message" class="sr-only">Message</label>
+                        <textarea id="message" name="message" rows="4" required
+                            class="appearance-none block w-full px-3 py-3 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                            placeholder="Write your message..."></textarea>
+                    </div>
+
+                    <div>
+                        <button type="submit"
+                            class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition">
+                            Send Message 🚀
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Contact Info -->
+            <div class="space-y-6">
+                <div class="bg-white shadow-lg rounded-2xl p-6 flex items-start space-x-4 hover:shadow-xl transition">
+                    <div class="flex-shrink-0">
+                        <span class="text-2xl">📍</span>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-medium text-blue-600">Our Location</h3>
+                        <p class="mt-1 text-gray-500">Adaptive Learning LMS<br>Bisag- N Gandhinagar</p>
+                    </div>
+                </div>
+
+                <div class="bg-white shadow-lg rounded-2xl p-6 flex items-start space-x-4 hover:shadow-xl transition">
+                    <div class="flex-shrink-0">
+                        <span class="text-2xl">📧</span>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-medium text-blue-600">Email</h3>
+                        <p class="mt-1 text-gray-500">yashrajveer40@gmail.com</p>
+                    </div>
+                </div>
+
+                <div class="bg-white shadow-lg rounded-2xl p-6 flex items-start space-x-4 hover:shadow-xl transition">
+                    <div class="flex-shrink-0">
+                        <span class="text-2xl">📞</span>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-medium text-blue-600">Phone</h3>
+                        <p class="mt-1 text-gray-500">+91 93133 85318</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

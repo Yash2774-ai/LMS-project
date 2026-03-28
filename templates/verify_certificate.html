@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% if valid %}Certificate Verified{% else %}Invalid Certificate{% endif %} | Adaptive LMS</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    .badge-valid   { background: linear-gradient(135deg, #10B981, #059669); }
+    .badge-invalid { background: linear-gradient(135deg, #EF4444, #DC2626); }
+    .card-glow-valid   { box-shadow: 0 0 0 1px #d1fae5, 0 20px 60px rgba(16,185,129,.15); }
+    .card-glow-invalid { box-shadow: 0 0 0 1px #fee2e2, 0 20px 60px rgba(239,68,68,.15); }
+  </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 flex items-center justify-center px-4 py-16">
+
+  <div class="w-full max-w-md">
+    <!-- Logo / Brand -->
+    <div class="text-center mb-8">
+      <span class="text-2xl font-bold text-gray-800 tracking-tight">🎓 Adaptive LMS</span>
+      <p class="text-sm text-gray-500 mt-1">Certificate Verification Portal</p>
+    </div>
+
+    {% if valid %}
+    <!-- ── VALID ───────────────────────────────────────────────────────── -->
+    <div class="bg-white rounded-3xl p-8 card-glow-valid">
+      <!-- Status Badge -->
+      <div class="flex justify-center mb-6">
+        <div class="badge-valid text-white px-6 py-2 rounded-full flex items-center gap-2 text-sm font-bold shadow-lg">
+          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+          VERIFIED — VALID CERTIFICATE
+        </div>
+      </div>
+
+      <!-- Certificate Info -->
+      <div class="text-center mb-8">
+        <p class="text-gray-500 text-sm uppercase tracking-wider font-medium mb-2">This certifies that</p>
+        <h2 class="text-3xl font-bold text-gray-900 font-poppins mb-4">{{ student_name }}</h2>
+        <p class="text-gray-500 text-sm uppercase tracking-wider font-medium mb-2">has successfully completed</p>
+        <h3 class="text-xl font-semibold text-blue-700">{{ course_name }}</h3>
+      </div>
+
+      <!-- Divider -->
+      <div class="border-t border-gray-100 my-6"></div>
+
+      <!-- Metadata -->
+      <div class="space-y-3 text-sm">
+        <div class="flex justify-between items-center text-gray-600">
+          <span class="font-medium text-gray-400 uppercase tracking-wide text-xs">Date Issued</span>
+          <span class="font-semibold">{{ issued_at|date:"d F Y" }}</span>
+        </div>
+        <div class="flex justify-between items-center text-gray-600">
+          <span class="font-medium text-gray-400 uppercase tracking-wide text-xs">Verification ID</span>
+          <span class="font-mono text-xs text-gray-400 break-all">{{ verification_code|truncatechars:20 }}…</span>
+        </div>
+        <div class="flex justify-between items-center">
+          <span class="font-medium text-gray-400 uppercase tracking-wide text-xs">Status</span>
+          <span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-bold">✓ ACTIVE</span>
+        </div>
+      </div>
+    </div>
+
+    {% else %}
+    <!-- ── INVALID ─────────────────────────────────────────────────────── -->
+    <div class="bg-white rounded-3xl p-8 card-glow-invalid">
+      <div class="flex justify-center mb-6">
+        <div class="badge-invalid text-white px-6 py-2 rounded-full flex items-center gap-2 text-sm font-bold shadow-lg">
+          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
+          INVALID CERTIFICATE
+        </div>
+      </div>
+
+      <div class="text-center mb-6">
+        <div class="text-6xl mb-4">⚠️</div>
+        <h2 class="text-2xl font-bold text-gray-900 mb-2">Certificate Not Found</h2>
+        <p class="text-gray-500 text-sm leading-relaxed">
+          The verification code you provided does not match any certificate in our system.
+          This may mean the certificate is fraudulent, revoked, or the URL is incorrect.
+        </p>
+      </div>
+
+      <div class="border-t border-gray-100 my-6"></div>
+
+      <div class="text-sm text-center text-gray-400">
+        <span class="font-medium text-gray-500">Code provided: </span>
+        <span class="font-mono break-all">{{ verification_code }}</span>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Footer note -->
+    <p class="text-center text-xs text-gray-400 mt-6">
+      Powered by <span class="font-semibold text-gray-600">Adaptive LMS</span> · Certificates are issued and verified by our platform.
+    </p>
+  </div>
+
+</body>
+</html>

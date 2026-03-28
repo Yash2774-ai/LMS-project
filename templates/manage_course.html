@@ -1,0 +1,577 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block navbar %}
+{% include 'partials/navbar_dashboard.html' %}
+{% endblock %}
+
+{% block content %}
+<style>
+    :root {
+        --primary: #2563eb;
+        --primary-light: #eff6ff;
+        --secondary: #64748b;
+        --accent: #3b82f6;
+        --success: #10b981;
+        --danger: #ef4444;
+        --danger-light: #fef2f2;
+        --warning: #f59e0b;
+        --background: #f8fafc;
+        --surface: #ffffff;
+        --border: #e2e8f0;
+        --text-main: #1e293b;
+        --text-muted: #64748b;
+    }
+
+    body {
+        background-color: var(--background);
+        color: var(--text-main);
+    }
+
+    .course-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem 1rem;
+    }
+
+    /* Breadcrumbs */
+    .breadcrumb-item + .breadcrumb-item::before {
+        content: ">";
+        color: var(--text-muted);
+        font-size: 0.8rem;
+    }
+    .breadcrumb-item a {
+        color: var(--text-muted);
+        text-decoration: none;
+        font-size: 0.9rem;
+    }
+    .breadcrumb-item.active {
+        color: var(--text-main);
+        font-weight: 500;
+    }
+
+    /* Header */
+    .course-header {
+        margin-bottom: 2rem;
+    }
+    .course-title {
+        font-weight: 700;
+        font-size: 2rem;
+        color: var(--text-main);
+        margin-bottom: 0.5rem;
+    }
+    .badge-category {
+        background-color: var(--primary-light);
+        color: var(--primary);
+        font-weight: 600;
+        letter-spacing: 0.05em;
+        padding: 0.4rem 0.8rem;
+        border-radius: 6px;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+    }
+    .course-meta {
+        color: var(--text-muted);
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    /* Tabs */
+    .nav-tabs {
+        border-bottom: 1px solid var(--border);
+        gap: 2rem;
+        margin-bottom: 2rem;
+    }
+    .nav-tabs .nav-link {
+        border: none;
+        color: var(--text-muted);
+        font-weight: 500;
+        padding: 0.75rem 0;
+        background: none;
+        position: relative;
+        transition: color 0.2s;
+    }
+    .nav-tabs .nav-link:hover {
+        color: var(--text-main);
+    }
+    .nav-tabs .nav-link.active {
+        color: var(--primary);
+        background: none;
+    }
+    .nav-tabs .nav-link.active::after {
+        content: "";
+        position: absolute;
+        bottom: -1px;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background-color: var(--primary);
+    }
+
+    /* Cards */
+    .card-custom {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 2rem;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+        margin-bottom: 1.5rem;
+    }
+    .card-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--text-main);
+        margin-bottom: 1.5rem;
+    }
+
+    /* Buttons */
+    .btn-custom {
+        border-radius: 8px;
+        font-weight: 600;
+        padding: 0.6rem 1.2rem;
+        transition: all 0.2s;
+    }
+    .btn-hide {
+        border: 1px solid var(--border);
+        background: var(--surface);
+        color: var(--text-main);
+    }
+    .btn-hide:hover {
+        background: var(--background);
+        border-color: var(--secondary);
+    }
+    .btn-delete-soft {
+        background-color: var(--danger-light);
+        color: var(--danger);
+        border: none;
+    }
+    .btn-delete-soft:hover {
+        background-color: #fee2e2;
+        color: #dc2626;
+    }
+    .btn-primary-custom {
+        background-color: var(--primary);
+        color: white;
+        border: none;
+    }
+    .btn-primary-custom:hover {
+        background-color: #1d4ed8;
+        transform: translateY(-1px);
+    }
+
+    /* Sections / Modules */
+    .section-card {
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        background: var(--surface);
+        margin-bottom: 1rem;
+        overflow: hidden;
+    }
+    .section-header {
+        padding: 1rem 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        cursor: pointer;
+    }
+    .section-info {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+    .section-icon {
+        width: 40px;
+        height: 40px;
+        background: var(--primary-light);
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+    }
+    .section-badge {
+        font-size: 0.7rem;
+        background: var(--primary-light);
+        color: var(--primary);
+        padding: 0.2rem 0.6rem;
+        border-radius: 4px;
+        font-weight: 600;
+    }
+
+    /* Table Styles */
+    .table-custom th {
+        background: #fcfcfd;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.05em;
+        font-weight: 600;
+        padding: 1rem 1.5rem;
+        border-bottom: 1px solid var(--border);
+    }
+    .table-custom td {
+        padding: 1rem 1.5rem;
+        vertical-align: middle;
+        border-bottom: 1px solid var(--border);
+    }
+    .user-avatar {
+        width: 32px;
+        height: 32px;
+        background: var(--primary-light);
+        color: var(--primary);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        font-size: 0.8rem;
+    }
+
+    /* Settings Control */
+    .form-label {
+        font-weight: 500;
+        color: var(--text-muted);
+        margin-bottom: 0.5rem;
+    }
+    .form-control-custom {
+        border-radius: 8px;
+        border: 1px solid var(--border);
+        padding: 0.75rem 1rem;
+    }
+    .form-control-custom:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        outline: none;
+    }
+
+    .danger-zone {
+        border-radius: 12px;
+        background-color: var(--danger-light);
+        padding: 1.5rem;
+        border: 1px solid #fee2e2;
+    }
+</style>
+
+<div class="course-container">
+    <!-- Breadcrumbs -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'teacher_dashboard' %}">Dashboard</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{{ course.shortname }}</li>
+        </ol>
+    </nav>
+
+    <!-- Header -->
+    <div class="course-header d-flex justify-content-between align-items-start">
+        <div>
+            <h1 class="course-title">{{ course.fullname }}</h1>
+            <div class="course-meta">
+                <span class="badge-category">{{ course.shortname }}</span>
+                <span>Course ID: {{ course.id|default:"N/A" }}</span>
+            </div>
+        </div>
+        <div class="d-flex gap-3">
+            {% if course.visible %}
+                <a href="?action=hide" class="btn btn-custom btn-hide text-decoration-none">Hide Course</a>
+            {% else %}
+                <a href="?action=show" class="btn btn-custom btn-hide text-decoration-none text-primary">Show Course</a>
+            {% endif %}
+            <form action="?action=delete" method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this course?')">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-custom btn-delete-soft">Delete</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Tab Navigation -->
+    <ul class="nav nav-tabs" id="courseTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="overview-tab" data-bs-toggle="tab" data-bs-target="#overview" type="button" role="tab">Overview</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="contents-tab" data-bs-toggle="tab" data-bs-target="#contents" type="button" role="tab">Contents</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="students-tab" data-bs-toggle="tab" data-bs-target="#students" type="button" role="tab">Students</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="settings-tab" data-bs-toggle="tab" data-bs-target="#settings" type="button" role="tab">Settings</button>
+        </li>
+    </ul>
+
+    <!-- Tab Content -->
+    <div class="tab-content" id="courseTabsContent">
+        <!-- Overview Tab -->
+        <div class="tab-pane fade show active" id="overview" role="tabpanel">
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="card-custom">
+                        <h3 class="card-title">Description</h3>
+                        <div class="text-muted">
+                            {{ course.summary|safe|default:"No description available." }}
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card-custom">
+                        <h3 class="card-title">Quick Stats</h3>
+                        <div class="d-flex flex-column gap-4">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="text-muted">Enrolled Students</span>
+                                <span class="badge bg-blue-50 text-blue-600 px-3 py-2 rounded-lg font-bold">{{ enrolled_students }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="text-muted">Total Modules</span>
+                                <span class="badge bg-green-50 text-green-600 px-3 py-2 rounded-lg font-bold">{{ total_modules }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="text-muted">Category ID</span>
+                                <span class="badge bg-gray-50 text-gray-600 px-3 py-2 rounded-lg font-bold">{{ course.categoryid|default:"1" }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Contents Tab -->
+        <div class="tab-pane fade" id="contents" role="tabpanel">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h3 class="card-title mb-0">Course Materials</h3>
+                <div class="d-flex gap-2">
+                    <a href="{{ moodle_base_url }}/course/view.php?id={{ course.id }}&notifyeditingon=1" target="_blank" class="btn btn-custom btn-hide btn-sm">+ Add Section</a>
+                    <a href="{% url 'sync_modules' course_id=course.id %}" class="btn btn-custom btn-primary-custom btn-sm">Sync from Moodle</a>
+                </div>
+            </div>
+
+            {% if sections %}
+                {% for section_name, modules in sections %}
+                    <div class="section-card shadow-sm">
+                        <div class="section-header" data-accordion-toggle>
+                            <div class="section-info">
+                                <div class="section-icon">
+                                    {% if section_name|lower == "video" %}🎬{% elif section_name|lower == "theory" %}📘{% elif section_name|lower == "quiz" %}🧩{% elif section_name|lower == "assignment" %}🏁{% elif section_name|lower == "certificate" %}🎓{% else %}📁{% endif %}
+                                </div>
+                                <div>
+                                    <div class="fw-bold fs-5">{{ section_name|title }} <span class="section-badge ms-2">{{ modules|length }} module{{ modules|length|pluralize }}</span></div>
+                                    <div class="text-muted small text-uppercase" style="letter-spacing: 0.05em; font-size: 0.65rem;">
+                                        {% if section_name|lower == "video" %}INTRODUCTORY LECTURE VIDEOS{% elif section_name|lower == "theory" %}CORE CONCEPTS AND READING MATERIAL{% elif section_name|lower == "quiz" %}KNOWLEDGE CHECK ASSESSMENTS{% elif section_name|lower == "assignment" %}MILESTONE EVALUATION & FEEDBACK{% elif section_name|lower == "certificate" %}COURSE COMPLETION CERTIFICATE{% else %}GENERAL MODULES{% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="d-flex align-items-center gap-3" onclick="event.stopPropagation()">
+                                <a href="{{ moodle_base_url }}/course/view.php?id={{ course.id }}&notifyeditingon=1" target="_blank" class="btn btn-link text-primary p-0 small text-decoration-none fw-bold">+ Add Module</a>
+                                <span class="text-success" style="font-size: 0.5rem;">●</span>
+                                <i class="bi bi-chevron-down text-muted"></i>
+                            </div>
+                        </div>
+                        <div class="accordion-panel" data-accordion-panel style="max-height: 5000px; overflow: hidden; transition: max-height 0.3s ease-out; border-top: 1px solid var(--border);">
+                            <div class="p-3 bg-light bg-opacity-10">
+                                {% for module in modules %}
+                                    <div class="d-flex justify-content-between align-items-center py-2 px-3 bg-white border rounded-3 mb-2">
+                                        <div class="d-flex align-items-center gap-3">
+                                            <div class="p-2 bg-blue-50 text-blue-600 rounded">
+                                                <i class="bi bi-file-earmark-play"></i>
+                                            </div>
+                                            <div>
+                                                <div class="fw-semibold">{{ module.name }}</div>
+                                                <div class="text-muted small">{{ module.module_type }}</div>
+                                            </div>
+                                        </div>
+                                        <div class="d-flex align-items-center gap-3">
+                                            {% if module.module_type == "video" %}
+                                                {% if module.mpd_url %}
+                                                    <span class="badge bg-success-subtle text-success px-2 py-1" style="font-size: 0.7rem;">Stream Ready</span>
+                                                {% else %}
+                                                    <a href="{% url 'upload_video_module' cmid=module.moodle_cmid %}" class="badge bg-primary-subtle text-primary px-2 py-1 text-decoration-none" style="font-size: 0.7rem;">Upload Video</a>
+                                                {% endif %}
+                                            {% endif %}
+                                            <div class="d-flex gap-2">
+                                                <a href="{{ moodle_base_url }}/course/modedit.php?update={{ module.moodle_cmid }}&return=1" target="_blank" class="btn btn-sm btn-light text-primary" title="Edit in Moodle"><i class="bi bi-pencil"></i></a>
+                                                <button class="btn btn-sm btn-light text-muted" onclick="alert('Module settings coming soon!')"><i class="bi bi-gear"></i></button>
+                                                <button class="btn btn-sm btn-light text-danger" onclick="deleteModule('{{ module.moodle_cmid }}')"><i class="bi bi-trash"></i></button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                                {% if not modules %}
+                                    <div class="text-center py-3 text-muted small">No modules in this category.</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="alert alert-info rounded-4 border-0 shadow-sm">
+                    No course materials found. Sync from Moodle to import content.
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Students Tab -->
+        <div class="tab-pane fade" id="students" role="tabpanel">
+            <div class="card-custom p-0 overflow-hidden">
+                <div class="p-4 d-flex justify-content-between align-items-center border-bottom">
+                    <h3 class="card-title mb-0">Enrolled Students</h3>
+                    <button onclick="alert('Enrol feature coming soon!')" class="btn btn-link text-primary text-decoration-none fw-bold p-0">+ Enrol User</button>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-custom mb-0">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Roles</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for student in students %}
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div class="user-avatar text-secondary">
+                                            {{ student.fullname|slice:":1"|upper }}
+                                        </div>
+                                        <span class="fw-bold">{{ student.fullname }}</span>
+                                    </div>
+                                </td>
+                                <td class="text-muted">{{ student.email }}</td>
+                                <td>
+                                    <span class="badge bg-blue-50 text-blue-600 px-2 py-1 fw-medium" style="font-size: 0.75rem;">Student</span>
+                                </td>
+                                <td>
+                                    <button class="btn btn-link text-danger text-decoration-none p-0 fw-bold small" onclick="unenrolStudent('{{ student.id }}', '{{ student.fullname }}')">Unenrol</button>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4" class="text-center py-5 text-muted">No students enrolled.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Settings Tab -->
+        <div class="tab-pane fade" id="settings" role="tabpanel">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="card-custom">
+                        <h3 class="card-title">Course Settings</h3>
+                        <form action="{% url 'update_course_settings_api' course_id=course.id %}" method="POST">
+                            {% csrf_token %}
+                            <div class="mb-4">
+                                <label class="form-label">Edit Fullname</label>
+                                <input type="text" class="form-control form-control-custom" value="{{ course.fullname }}" name="fullname">
+                            </div>
+                            <div class="mb-4">
+                                <label class="form-label">Edit Shortname</label>
+                                <input type="text" class="form-control form-control-custom" value="{{ course.shortname }}" name="shortname">
+                            </div>
+                            <button type="submit" class="btn btn-custom btn-primary-custom w-100 mt-2">Save Changes</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap Icons -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Tab switching persistence or custom logic if needed
+    });
+
+    function unenrolStudent(studentId, studentName) {
+        if (confirm(`Are you sure you want to unenrol ${studentName}?`)) {
+            fetch("{% url 'unenrol_student_api' %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({
+                    student_id: studentId,
+                    course_id: '{{ course.id }}'
+                })
+            }).then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            });
+        }
+    }
+
+    function deleteModule(cmid) {
+        if (confirm('Are you sure you want to delete this module?')) {
+            fetch("{% url 'delete_module' %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({ cmid: cmid })
+            }).then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            });
+        }
+    }
+
+    function deleteCourse(courseId, courseName) {
+        if (confirm(`CRITICAL: Are you sure you want to permanently delete "${courseName}"? This action cannot be undone.`)) {
+            fetch(`/teacher/delete-course/${courseId}/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}'
+                }
+            }).then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.href = '/dashboard/?section=courses';
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            });
+        }
+    }
+
+    // Custom Accordion Logic
+    document.querySelectorAll('[data-accordion-toggle]').forEach(header => {
+        header.addEventListener('click', () => {
+            const panel = header.nextElementSibling;
+            const chevron = header.querySelector('.bi-chevron-down');
+            
+            if (panel.style.maxHeight === '0px') {
+                // Expanding
+                panel.style.maxHeight = '5000px';
+                if (chevron) {
+                    chevron.style.transform = 'rotate(0deg)';
+                }
+            } else {
+                // Collapsing
+                panel.style.maxHeight = '0px';
+                if (chevron) {
+                    chevron.style.transform = 'rotate(-90deg)';
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}

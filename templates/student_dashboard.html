@@ -1,0 +1,731 @@
+{% extends 'base.html' %}
+
+{% block title %}Student Dashboard | Adaptive Learning LMS{% endblock %}
+
+{% block navbar %}
+{% include 'partials/navbar_dashboard.html' %}
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 flex">
+
+    <!-- Sidebar -->
+    <aside
+        class="w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 min-h-screen fixed left-0 top-0 bottom-0 pt-16 hidden md:block z-10 transition-colors duration-200">
+        <div class="px-6 py-4">
+            <h2 class="text-xs uppercase text-gray-400 font-bold tracking-wider mb-4">Student Menu</h2>
+            <nav class="space-y-2">
+                <a href="#" onclick="showSection('dashboard', this)"
+                    class="sidebar-link active flex items-center px-4 py-3 text-sm font-medium rounded-xl text-blue-600 bg-blue-50 transition-colors">
+                    <span class="mr-3 text-lg">📊</span> Dashboard
+                </a>
+                <a href="#" onclick="showSection('my-courses', this)"
+                    class="sidebar-link flex items-center px-4 py-3 text-sm font-medium rounded-xl text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors">
+                    <span class="mr-3 text-lg">📚</span> My Courses
+                </a>
+                <a href="#" onclick="showSection('progress', this)"
+                    class="sidebar-link flex items-center px-4 py-3 text-sm font-medium rounded-xl text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors">
+                    <span class="mr-3 text-lg">📈</span> Progress
+                </a>
+                <a href="#" onclick="showSection('certificates', this)"
+                    class="sidebar-link flex items-center px-4 py-3 text-sm font-medium rounded-xl text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors">
+                    <span class="mr-3 text-lg">🏆</span> Certificates
+                </a>
+                <a href="#" onclick="showSection('notifications', this)"
+                    class="sidebar-link flex items-center px-4 py-3 text-sm font-medium rounded-xl text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors">
+                    <span class="mr-3 text-lg">🔔</span> Notifications
+                </a>
+                <a href="#" onclick="showSection('settings', this)"
+                    class="sidebar-link flex items-center px-4 py-3 text-sm font-medium rounded-xl text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors">
+                    <span class="mr-3 text-lg">⚙️</span> Settings
+                </a>
+            </nav>
+        </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 md:ml-64 p-8 transition-all dark:bg-gray-900">
+        <div class="max-w-7xl mx-auto">
+
+            <!-- Messages -->
+            {% if messages %}
+            <div class="mb-8">
+                {% for message in messages %}
+                <div
+                    class="p-4 rounded-xl mb-2 {% if message.tags == 'success' %}bg-green-100 text-green-800 border-green-200{% else %}bg-red-100 text-red-800 border-red-200{% endif %} border">
+                    {{ message }}
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <!-- Dashboard Section -->
+            <div id="section-dashboard" class="content-section">
+                <!-- Header -->
+                <div class="mb-8 flex justify-between items-center">
+                    <div>
+                        <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
+                        <p class="text-gray-500 dark:text-gray-400 mt-1">Welcome back! Here's your learning overview.</p>
+                    </div>
+                    <a href="{% url 'student_explore_courses' %}" 
+                        class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-xl shadow-lg transition transform hover:-translate-y-1 inline-flex items-center">
+                        <span class="mr-2">🔎</span> Explore Courses
+                    </a>
+                </div>
+
+                <!-- Stats Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                    <!-- Enrolled Courses -->
+                    <div
+                        class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex items-center transition hover:shadow-md">
+                        <div class="p-4 bg-blue-100 rounded-xl text-blue-600 text-3xl mr-4">📚</div>
+                        <div>
+                            <p class="text-gray-500 text-sm font-medium">Enrolled Courses</p>
+                            <h3 class="text-2xl font-bold text-gray-900">4</h3>
+                        </div>
+                    </div>
+                    <!-- Overall Progress -->
+                    <div
+                        class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex items-center transition hover:shadow-md">
+                        <div class="p-4 bg-green-100 rounded-xl text-green-600 text-3xl mr-4">📈</div>
+                        <div class="w-full">
+                            <p class="text-gray-500 text-sm font-medium mb-1">Overall Progress</p>
+                            <div class="flex items-center justify-between mb-2">
+                                <h3 class="text-2xl font-bold text-gray-900">65%</h3>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2">
+                                <div class="bg-green-500 h-2 rounded-full" style="width: 65%"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Earned Certificates -->
+                    <div
+                        class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex items-center transition hover:shadow-md">
+                        <div class="p-4 bg-purple-100 rounded-xl text-purple-600 text-3xl mr-4">🏆</div>
+                        <div>
+                            <p class="text-gray-500 text-sm font-medium">Earned Certificates</p>
+                            <h3 class="text-2xl font-bold text-gray-900">2</h3>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Activity Section -->
+                <div class="bg-white rounded-3xl shadow-lg border border-gray-100 overflow-hidden">
+                    <div class="p-6 border-b border-gray-100 flex justify-between items-center">
+                        <h2 class="text-xl font-bold text-gray-900">Recent Activity</h2>
+                    </div>
+
+                    <div class="divide-y divide-gray-100">
+                        <div class="p-6 hover:bg-gray-50 transition duration-150 flex items-center">
+                            <div
+                                class="flex-shrink-0 h-10 w-10 rounded-full bg-green-100 flex items-center justify-center text-green-600 font-bold text-lg">
+                                ✓
+                            </div>
+                            <div class="ml-4 flex-1">
+                                <p class="text-sm font-medium text-gray-900">
+                                    Completed Quiz: <span class="font-bold text-blue-600">Python Basics</span>
+                                </p>
+                                <p class="text-xs text-gray-500 mt-1">2 hours ago</p>
+                            </div>
+                            <div>
+                                <span class="text-sm font-bold text-green-600">Score: 90%</span>
+                            </div>
+                        </div>
+                        <div class="p-6 hover:bg-gray-50 transition duration-150 flex items-center">
+                            <div
+                                class="flex-shrink-0 h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-lg">
+                                📖
+                            </div>
+                            <div class="ml-4 flex-1">
+                                <p class="text-sm font-medium text-gray-900">
+                                    Started Module: <span class="font-bold text-blue-600">Introduction to React</span>
+                                </p>
+                                <p class="text-xs text-gray-500 mt-1">Yesterday</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- My Courses Section -->
+            <div id="section-my-courses" class="content-section hidden">
+                <div class="mb-8">
+                    <h1 class="text-3xl font-bold text-gray-900">My Courses</h1>
+                    <p class="text-gray-500 mt-1">Your enrolled courses and learning path.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {% for course in enrolled_courses %}
+                    <!-- Course Card -->
+                    <div
+                        class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden hover:shadow-md transition">
+                        <div class="p-6">
+                            <div
+                                class="h-12 w-12 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center text-blue-600 dark:text-blue-400 text-2xl mb-4">
+                                📚
+                            </div>
+                            <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2">{{ course.fullname|default:"Untitled Course" }}</h3>
+                            <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5 mb-2 mt-4">
+                                <div class="bg-blue-600 h-1.5 rounded-full" style="width: 0%"></div>
+                            </div>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mb-4 text-right">0% Complete</p>
+
+                            <a href="{% url 'student_course_view' course.id %}"
+                                class="w-full bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 font-semibold py-2 px-4 rounded-xl border border-gray-200 dark:border-gray-600 transition text-sm text-center inline-block">
+                                Continue Course →
+                            </a>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="col-span-full bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-8 text-center">
+                        <div class="text-4xl mb-4">📚</div>
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">No enrolled courses</h3>
+                        <p class="text-gray-500 dark:text-gray-400 mb-4">You haven't enrolled in any courses yet.</p>
+                        <a href="{% url 'student_explore_courses' %}" 
+                            class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-xl shadow-lg transition transform hover:-translate-y-1 inline-flex items-center">
+                            <span class="mr-2">🔎</span> Explore Courses
+                        </a>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Course View Section (Drill-down from My Courses) -->
+            <div id="section-course-view" class="content-section hidden">
+                <div class="mb-6 flex items-center justify-between">
+                    <div>
+                        <button onclick="showSection('my-courses', null)"
+                            class="text-sm font-semibold text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 mb-2 flex items-center">
+                            ← Back to Courses
+                        </button>
+                        <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Python for Beginners</h1>
+                        <p class="text-gray-500 dark:text-gray-400 mt-1">Modules and lessons</p>
+                    </div>
+                </div>
+
+                <div
+                    class="bg-white dark:bg-gray-800 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
+                    <div class="space-y-4">
+                        <!-- Module Unlocked -->
+                        <div
+                            class="border border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-900/20 rounded-2xl p-5 flex items-start">
+                            <div
+                                class="bg-green-500 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold mr-4 shrink-0">
+                                1</div>
+                            <div class="flex-1">
+                                <div class="flex justify-between items-center mb-1">
+                                    <h3 class="font-bold text-gray-900 dark:text-white text-lg">Introduction to Python
+                                    </h3>
+                                    <span
+                                        class="text-xs font-semibold px-2.5 py-1 rounded-full bg-green-200 dark:bg-green-800 text-green-800 dark:text-green-200">Completed</span>
+                                </div>
+                                <p class="text-sm text-gray-600 dark:text-gray-400 mb-3">Learn the basics of Python
+                                    syntax and data types.
+                                </p>
+                                <button
+                                    class="text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300">Review
+                                    Material
+                                    →</button>
+                            </div>
+                        </div>
+
+                        <!-- Module In Progress -->
+                        <div
+                            class="border border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-900/20 rounded-2xl p-5 flex items-start">
+                            <div
+                                class="bg-blue-500 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold mr-4 shrink-0">
+                                2</div>
+                            <div class="flex-1">
+                                <div class="flex justify-between items-center mb-1">
+                                    <h3 class="font-bold text-gray-900 dark:text-white text-lg">Control Flow and
+                                        Functions</h3>
+                                    <span
+                                        class="text-xs font-semibold px-2.5 py-1 rounded-full bg-blue-200 dark:bg-blue-800 text-blue-800 dark:text-blue-200">In
+                                        Progress</span>
+                                </div>
+                                <p class="text-sm text-gray-600 dark:text-gray-400 mb-3">Understanding loops,
+                                    conditionals, and defining
+                                    functions.</p>
+                                <button
+                                    class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-1.5 px-4 rounded-lg transition">Continue
+                                    Learning</button>
+                            </div>
+                        </div>
+
+                        <!-- Module Locked -->
+                        <div
+                            class="border border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-700/30 rounded-2xl p-5 flex items-start relative overflow-hidden">
+                            <div
+                                class="bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400 rounded-full w-8 h-8 flex items-center justify-center font-bold mr-4 shrink-0 relative z-10">
+                                3</div>
+                            <div class="flex-1 relative z-10 opacity-75">
+                                <div class="flex justify-between items-center mb-1">
+                                    <h3 class="font-bold text-gray-700 dark:text-gray-300 text-lg">Data Structures</h3>
+                                    <span class="text-lg" title="Locked">🔒</span>
+                                </div>
+                                <p class="text-sm text-gray-500 dark:text-gray-400 mb-3">Lists, dictionaries, tuples,
+                                    and sets.</p>
+                                <p class="text-xs text-orange-600 dark:text-orange-400 font-semibold italic">Complete
+                                    Module 2 to unlock</p>
+                            </div>
+                        </div>
+
+                        <!-- Module Locked -->
+                        <div
+                            class="border border-gray-200 bg-gray-50/50 rounded-2xl p-5 flex items-start relative overflow-hidden">
+                            <div
+                                class="bg-gray-300 text-gray-500 rounded-full w-8 h-8 flex items-center justify-center font-bold mr-4 shrink-0 relative z-10">
+                                4</div>
+                            <div class="flex-1 relative z-10 opacity-75">
+                                <div class="flex justify-between items-center mb-1">
+                                    <h3 class="font-bold text-gray-700 text-lg">Object-Oriented Programming</h3>
+                                    <span class="text-lg" title="Locked">🔒</span>
+                                </div>
+                                <p class="text-sm text-gray-500 mb-3">Classes, objects, inheritance, and polymorphism.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Progress Section -->
+            <div id="section-progress" class="content-section hidden">
+                <div class="mb-8">
+                    <h1 class="text-3xl font-bold text-gray-900">Learning Progress</h1>
+                    <p class="text-gray-500 mt-1">Track your performance and quiz scores.</p>
+                </div>
+
+                <div
+                    class="bg-white dark:bg-gray-800 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-700 p-6 mb-6">
+                    <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-4">Quiz Scores Overview</h2>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-gray-50 text-gray-500 text-xs uppercase tracking-wider">
+                                    <th class="p-4 font-semibold rounded-tl-xl border-b border-gray-100">Course</th>
+                                    <th class="p-4 font-semibold border-b border-gray-100">Quiz Name</th>
+                                    <th class="p-4 font-semibold border-b border-gray-100">Score</th>
+                                    <th class="p-4 font-semibold rounded-tr-xl border-b border-gray-100">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-50 text-sm">
+                                <tr class="hover:bg-gray-50/50 transition">
+                                    <td class="p-4 font-medium text-gray-900">Python for Beginners</td>
+                                    <td class="p-4 text-gray-600">Module 1 Quiz</td>
+                                    <td class="p-4 font-bold text-green-600">95%</td>
+                                    <td class="p-4"><span
+                                            class="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">Passed</span>
+                                    </td>
+                                </tr>
+                                <tr class="hover:bg-gray-50/50 transition">
+                                    <td class="p-4 font-medium text-gray-900">Advanced Web Dev</td>
+                                    <td class="p-4 text-gray-600">CSS Grid Assessment</td>
+                                    <td class="p-4 font-bold text-orange-500">75%</td>
+                                    <td class="p-4"><span
+                                            class="px-2 py-1 text-xs font-semibold rounded-full bg-orange-100 text-orange-800">Review
+                                            Required</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Certificates Section -->
+            <div id="section-certificates" class="content-section hidden">
+                <div class="mb-8">
+                    <h1 class="text-3xl font-bold text-gray-900">My Certificates</h1>
+                    <p class="text-gray-500 mt-1">View and download your earned certificates.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Certificate Card -->
+                    <div
+                        class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col md:flex-row transition hover:shadow-md">
+                        <div
+                            class="w-full md:w-32 bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center p-6 text-white text-5xl">
+                            🎓
+                        </div>
+                        <div class="p-6 flex-1 flex flex-col justify-center">
+                            <h3 class="text-xl font-bold text-gray-900 mb-1">HTML & CSS Masterclass</h3>
+                            <p class="text-sm text-gray-500 mb-4">Completed on Oct 15, 2025</p>
+                            <div>
+                                <button
+                                    class="bg-blue-50 border border-blue-200 text-blue-600 hover:bg-blue-100 hover:text-blue-700 font-semibold py-2 px-4 rounded-xl text-sm transition inline-flex items-center">
+                                    <span class="mr-2">⬇️</span> Download PDF
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Notifications Section -->
+            <div id="section-notifications" class="content-section hidden">
+                <div class="mb-8 flex justify-between items-center">
+                    <div>
+                        <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Notifications</h1>
+                        <p class="text-gray-500 dark:text-gray-400 mt-1">Stay updated with course announcements.</p>
+                    </div>
+                    <button class="text-sm font-medium text-blue-600 hover:text-blue-800">Mark all as read</button>
+                </div>
+
+                <div
+                    class="bg-white dark:bg-gray-800 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+                    <div class="divide-y divide-gray-50 dark:divide-gray-700">
+                        <div class="p-6 bg-blue-50/30 hover:bg-gray-50 transition flex items-start gap-4">
+                            <div
+                                class="bg-blue-100 text-blue-600 rounded-full w-10 h-10 flex items-center justify-center shrink-0">
+                                📢
+                            </div>
+                            <div class="flex-1">
+                                <h4 class="text-base font-bold text-gray-900 flex items-center">
+                                    New Assignment Posted
+                                    <span class="w-2 h-2 rounded-full bg-blue-500 ml-2"></span>
+                                </h4>
+                                <p class="text-sm text-gray-600 mt-1">A new assignment "Build a To-Do App" has been
+                                    added to Advanced Web Development.</p>
+                                <span class="text-xs text-gray-400 mt-2 block">1 hour ago</span>
+                            </div>
+                        </div>
+
+                        <div class="p-6 hover:bg-gray-50 transition flex items-start gap-4">
+                            <div
+                                class="bg-green-100 text-green-600 rounded-full w-10 h-10 flex items-center justify-center shrink-0">
+                                ⭐
+                            </div>
+                            <div class="flex-1">
+                                <h4 class="text-base font-medium text-gray-800">Quiz Graded</h4>
+                                <p class="text-sm text-gray-500 mt-1">Your Module 1 Quiz has been graded. Your score is
+                                    95%.</p>
+                                <span class="text-xs text-gray-400 mt-2 block">Yesterday</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Settings Section -->
+        <div id="section-settings" class="content-section hidden">
+            <div class="mb-8">
+                <h1 class="text-3xl font-bold text-gray-900">Settings</h1>
+                <p class="text-gray-500 mt-1">Manage your account and preferences.</p>
+            </div>
+
+            <div
+                class="bg-white dark:bg-gray-800 rounded-3xl shadow-lg border border-gray-100 dark:border-gray-700 overflow-hidden flex flex-col md:flex-row">
+                <!-- Settings Sidebar -->
+                <aside
+                    class="w-full md:w-64 border-r border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/50">
+                    <nav class="p-4 space-y-1">
+                        <button onclick="showSettingsTab('profile', this)"
+                            class="settings-tab-link active w-full flex items-center px-4 py-3 text-sm font-semibold rounded-xl text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 transition-colors">
+                            <span class="mr-3 text-lg">👤</span> Profile
+                        </button>
+                        <button onclick="showSettingsTab('account', this)"
+                            class="settings-tab-link w-full flex items-center px-4 py-3 text-sm font-semibold rounded-xl text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                            <span class="mr-3 text-lg">🔒</span> Account
+                        </button>
+                        <button onclick="showSettingsTab('notifications', this)"
+                            class="settings-tab-link w-full flex items-center px-4 py-3 text-sm font-semibold rounded-xl text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                            <span class="mr-3 text-lg">🔔</span> Notifications
+                        </button>
+                    </nav>
+                </aside>
+
+                <!-- Settings Content -->
+                <div class="flex-1 p-8">
+                    <!-- Profile Tab Content -->
+                    <div id="settings-profile" class="settings-tab-content">
+                        <div class="max-w-2xl">
+                            <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-6">Profile Settings</h2>
+
+                            <form class="space-y-6" action="{% url 'update_profile' %}" method="POST"
+                                enctype="multipart/form-data">
+                                {% csrf_token %}
+                                <div class="flex items-center space-x-6">
+                                    <div class="relative group">
+                                        <div
+                                            class="w-24 h-24 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-3xl border-4 border-white dark:border-gray-800 shadow-sm overflow-hidden">
+                                            {% if user.profile.profile_picture %}
+                                            <img src="{{ user.profile.profile_picture.url }}" alt="Profile Photo"
+                                                class="w-full h-full object-cover">
+                                            {% else %}
+                                            <span id="profile-initials">{{
+                                                request.user.first_name|default:request.user.username|slice:":1"|upper
+                                                }}</span>
+                                            {% endif %}
+                                        </div>
+                                        <label for="photo-upload"
+                                            class="absolute bottom-0 right-0 bg-blue-600 text-white p-2 rounded-full shadow-lg cursor-pointer transform hover:scale-110 transition">
+                                            📸
+                                            <input type="file" id="photo-upload" name="profile_picture" class="hidden"
+                                                accept="image/*">
+                                        </label>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-sm font-bold text-gray-900 dark:text-white">Profile Photo</h4>
+                                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">JPG, GIF or PNG. Max
+                                            size 2MB</p>
+                                    </div>
+                                </div>
+
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div class="col-span-2">
+                                        <label
+                                            class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Full
+                                            Name</label>
+                                        <input type="text" name="first_name" value="{{ request.user.first_name }}"
+                                            class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition outline-none transition-colors">
+                                    </div>
+                                    <div class="col-span-2">
+                                        <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Bio
+                                            /
+                                            Designation</label>
+                                        <input type="text" name="designation" value="{{ user.profile.designation }}"
+                                            placeholder="e.g. Student"
+                                            class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white mb-4 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition outline-none transition-colors">
+                                        <textarea rows="4" name="bio" placeholder="Tell us about your learning goals..."
+                                            class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition outline-none resize-none transition-colors">{{ user.profile.bio }}</textarea>
+                                    </div>
+                                </div>
+
+                                <div class="pt-4">
+                                    <button type="submit"
+                                        class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-xl shadow-lg transition transform hover:-translate-y-1">
+                                        Save Profile
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Account Tab Content -->
+                    <div id="settings-account" class="settings-tab-content hidden">
+                        <div class="max-w-2xl">
+                            <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-6">Account Settings</h2>
+
+                            <div class="space-y-8">
+                                <form class="space-y-4" action="{% url 'update_email' %}" method="POST">
+                                    {% csrf_token %}
+                                    <h3
+                                        class="text-sm font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
+                                        Email
+                                        Address</h3>
+                                    <div>
+                                        <label
+                                            class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Update
+                                            Email</label>
+                                        <input type="email" name="email" value="{{ request.user.email }}"
+                                            class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition outline-none transition-colors">
+                                    </div>
+                                    <button type="submit"
+                                        class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-xl transition">
+                                        Update Email
+                                    </button>
+                                </form>
+
+                                <hr class="border-gray-100">
+
+                                <form class="space-y-4" action="{% url 'update_password' %}" method="POST">
+                                    {% csrf_token %}
+                                    <h3
+                                        class="text-sm font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
+                                        Change
+                                        Password</h3>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div class="col-span-2">
+                                            <label
+                                                class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Current
+                                                Password</label>
+                                            <input type="password" name="old_password" placeholder="••••••••"
+                                                class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition outline-none transition-colors">
+                                        </div>
+                                        <div>
+                                            <label
+                                                class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">New
+                                                Password</label>
+                                            <input type="password" name="new_password1" placeholder="••••••••"
+                                                class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition outline-none transition-colors">
+                                        </div>
+                                        <div>
+                                            <label
+                                                class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Confirm
+                                                New
+                                                Password</label>
+                                            <input type="password" name="new_password2" placeholder="••••••••"
+                                                class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition outline-none transition-colors">
+                                        </div>
+                                    </div>
+                                    <button type="submit"
+                                        class="bg-gray-900 hover:bg-black text-white font-bold py-2 px-6 rounded-xl transition">
+                                        Change Password
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Notifications Tab Content -->
+                    <div id="settings-notifications" class="settings-tab-content hidden">
+                        <div class="max-w-2xl">
+                            <h2 class="text-xl font-bold text-gray-900 mb-6">Notification Preferences</h2>
+
+                            <div class="space-y-6">
+                                <div
+                                    class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900/50 rounded-2xl">
+                                    <div>
+                                        <p class="font-bold text-gray-900 dark:text-white">Email Notifications</p>
+                                        <p class="text-sm text-gray-500 dark:text-gray-400">Enable or disable all email
+                                            alerts</p>
+                                    </div>
+                                    <label class="relative inline-flex items-center cursor-pointer">
+                                        <input type="checkbox" checked class="sr-only peer">
+                                        <div
+                                            class="w-14 h-7 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:bg-green-500 transition-all duration-300 after:content-['OFF'] peer-checked:after:content-['ON'] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-6 after:w-10 after:flex after:items-center after:justify-center after:text-[10px] after:font-bold after:text-gray-400 peer-checked:after:text-green-500 peer-checked:after:translate-x-1 after:transition-all">
+                                        </div>
+                                    </label>
+                                </div>
+
+                                <div
+                                    class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900/50 rounded-2xl">
+                                    <div>
+                                        <p class="font-bold text-gray-900 dark:text-white">New Materials Alerts</p>
+                                        <p class="text-sm text-gray-500 dark:text-gray-400">Notify when new assignments
+                                            are posted</p>
+                                    </div>
+                                    <label class="relative inline-flex items-center cursor-pointer">
+                                        <input type="checkbox" checked class="sr-only peer">
+                                        <div
+                                            class="w-14 h-7 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:bg-green-500 transition-all duration-300 after:content-['OFF'] peer-checked:after:content-['ON'] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-6 after:w-10 after:flex after:items-center after:justify-center after:text-[10px] after:font-bold after:text-gray-400 peer-checked:after:text-green-500 peer-checked:after:translate-x-1 after:transition-all">
+                                        </div>
+                                    </label>
+                                </div>
+
+                                <div
+                                    class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900/50 rounded-2xl">
+                                    <div>
+                                        <p class="font-bold text-gray-900 dark:text-white">Quiz Result Notifications</p>
+                                        <p class="text-sm text-gray-500 dark:text-gray-400">Notify when your quiz
+                                            results are available</p>
+                                    </div>
+                                    <label class="relative inline-flex items-center cursor-pointer">
+                                        <input type="checkbox" checked class="sr-only peer">
+                                        <div
+                                            class="w-14 h-7 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:bg-green-500 transition-all duration-300 after:content-['OFF'] peer-checked:after:content-['ON'] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-6 after:w-10 after:flex after:items-center after:justify-center after:text-[10px] after:font-bold after:text-gray-400 peer-checked:after:text-green-500 peer-checked:after:translate-x-1 after:transition-all">
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Appearance Tab Content -->
+                </div>
+            </div>
+        </div>
+
+</div>
+</main>
+</div>
+
+<script>
+    function showSection(sectionId, linkElement) {
+        // Hide all sections
+        document.querySelectorAll('.content-section').forEach(el => {
+            el.classList.add('hidden');
+        });
+
+        // Show target section
+        const targetSection = document.getElementById('section-' + sectionId);
+        if (targetSection) {
+            targetSection.classList.remove('hidden');
+        }
+
+        // Update active class on links
+        if (linkElement && linkElement.classList.contains('sidebar-link')) {
+            document.querySelectorAll('.sidebar-link').forEach(el => {
+                el.classList.remove('bg-blue-50', 'text-blue-600');
+                el.classList.add('text-gray-600', 'hover:bg-gray-50', 'hover:text-gray-900');
+            });
+
+            // Add active class to clicked link
+            linkElement.classList.remove('text-gray-600', 'hover:bg-gray-50', 'hover:text-gray-900');
+            linkElement.classList.add('bg-blue-50', 'text-blue-600');
+        } else if (sectionId === 'course-view' || sectionId === 'my-courses') {
+            document.querySelectorAll('.sidebar-link').forEach(el => {
+                el.classList.remove('bg-blue-50', 'text-blue-600');
+                el.classList.add('text-gray-600', 'hover:bg-gray-50', 'hover:text-gray-900');
+            });
+            const myCoursesLink = document.querySelector('a[onclick*="showSection(\'my-courses\'"]');
+            if (myCoursesLink) {
+                myCoursesLink.classList.remove('text-gray-600', 'hover:bg-gray-50', 'hover:text-gray-900');
+                myCoursesLink.classList.add('bg-blue-50', 'text-blue-600');
+            }
+        }
+    }
+
+    // Auto-switch to section based on URL parameter
+    document.addEventListener('DOMContentLoaded', function () {
+        const urlParams = new URLSearchParams(window.location.search);
+        const section = urlParams.get('section');
+        const tab = urlParams.get('tab');
+        if (section) {
+            const link = document.querySelector(`[onclick*="showSection('${section}'"]`);
+            if (link) {
+                showSection(section, link);
+            } else {
+                showSection(section, null);
+            }
+
+            if (section === 'settings' && tab) {
+                const tabButton = document.querySelector(`[onclick*="showSettingsTab('${tab}'"]`);
+                if (tabButton) {
+                    showSettingsTab(tab, tabButton);
+                }
+            }
+        }
+    });
+
+    function showSettingsTab(tabId, buttonElement) {
+        // Hide all settings tab content
+        document.querySelectorAll('.settings-tab-content').forEach(el => {
+            el.classList.add('hidden');
+        });
+
+        // Show target settings tab content
+        document.getElementById('settings-' + tabId).classList.remove('hidden');
+
+        // Update active class on settings buttons
+        document.querySelectorAll('.settings-tab-link').forEach(el => {
+            el.classList.remove('active', 'bg-blue-50', 'text-blue-600');
+            el.classList.add('text-gray-600', 'hover:bg-gray-100');
+        });
+
+        // Add active class to clicked button
+        buttonElement.classList.add('active', 'bg-blue-50', 'text-blue-600');
+        buttonElement.classList.remove('text-gray-600', 'hover:bg-gray-100');
+    }
+
+    function toggleProfileDropdown() {
+        const menu = document.getElementById('profileDropdownMenu');
+        menu.classList.toggle('hidden');
+    }
+
+    // Close dropdown when clicking outside
+    window.addEventListener('click', function (e) {
+        const button = document.getElementById('profileDropdownButton');
+        const menu = document.getElementById('profileDropdownMenu');
+        if (button && !button.contains(e.target) && menu && !menu.contains(e.target)) {
+            menu.classList.add('hidden');
+        }
+    });
+
+</script>
+{% endblock %}
+
+{% block footer %}
+{% endblock %}

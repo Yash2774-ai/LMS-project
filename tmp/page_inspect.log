@@ -1,0 +1,8 @@
+=== index.html Fetch ===
+Status: 200
+Content-Type: application/json; charset=utf-8
+Content:
+{"error":"Access control exception","errorcode":"accessexception","stacktrace":"* line 60 of \\webservice\\pluginfile.php: webservice_access_exception thrown\n","debuginfo":"Web service file downloading must be enabled in external service settings\r\nError code: accessexception","reproductionlink":"http:\/\/localhost\/moodle\/"}
+
+=== mod_page_get_pages_by_courses ===
+null

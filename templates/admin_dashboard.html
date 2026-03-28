@@ -1,0 +1,750 @@
+{% extends 'base.html' %}
+
+{% block title %}Admin Panel | Secure Management{% endblock %}
+
+{% block extra_head %}
+<style>
+    .badge {
+        padding: 0.4rem 0.8rem;
+        border-radius: 0.75rem;
+        font-size: 0.65rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        display: inline-block;
+        letter-spacing: 0.05em;
+    }
+    .badge-info { background:#e6f4ea; color:#137333 }
+    .badge-warning { background:#fff4e5; color:#b06000 }
+    .badge-critical { background:#fdecea; color:#c5221f }
+</style>
+{% endblock %}
+
+{% block navbar %}
+<!-- Top navbar removed to favor integrated dashboard header -->
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 flex">
+
+    <!-- Sidebar -->
+    <aside class="w-64 bg-white border-r border-gray-100 min-h-screen fixed left-0 top-0 bottom-0 hidden md:block z-10">
+        <div class="px-8 py-8">
+            <!-- Logo Section -->
+            <div class="flex items-center gap-3 mb-12">
+                <div class="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center text-white text-xl">
+                    🎓
+                </div>
+                <div>
+                    <h1 class="font-bold text-xl leading-tight">LearnTrust</h1>
+                    <p class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Admin Panel</p>
+                </div>
+            </div>
+
+            <nav class="space-y-4">
+                <a href="#" onclick="showSection('overview', this)"
+                    class="sidebar-link active flex items-center px-4 py-4 text-sm font-bold rounded-2xl text-white bg-black transition-all">
+                    Dashboard
+                </a>
+                <a href="#" onclick="showSection('teachers', this)"
+                    class="sidebar-link flex items-center px-4 py-4 text-sm font-bold rounded-2xl text-gray-400 hover:bg-gray-100 hover:text-gray-900 transition-all">
+                    Requests
+                    {% if pending_teachers.count > 0 %}
+                    <span class="ml-auto bg-red-500 text-white text-[10px] px-2 py-0.5 rounded-full">{{
+                        pending_teachers.count }}</span>
+                    {% endif %}
+                </a>
+                <a href="#" onclick="showSection('users', this)"
+                    class="sidebar-link flex items-center px-4 py-4 text-sm font-bold rounded-2xl text-gray-400 hover:bg-gray-100 hover:text-gray-900 transition-all">
+                    Users
+                </a>
+                <a href="#" onclick="showSection('certificates', this)"
+                    class="sidebar-link flex items-center px-4 py-4 text-sm font-bold rounded-2xl text-gray-400 hover:bg-gray-100 hover:text-gray-900 transition-all">
+                    Certificates
+                </a>
+                <a href="#" onclick="showSection('audit', this)"
+                    class="sidebar-link flex items-center px-4 py-4 text-sm font-bold rounded-2xl text-gray-400 hover:bg-gray-100 hover:text-gray-900 transition-all">
+                    Audit Logs
+                </a>
+                <a href="#" onclick="showSection('settings', this)"
+                    class="sidebar-link flex items-center px-4 py-4 text-sm font-bold rounded-2xl text-gray-400 hover:bg-gray-100 hover:text-gray-900 transition-all">
+                    System Config
+                </a>
+            </nav>
+        </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 md:ml-64 transition-all">
+        <!-- Modern Header -->
+        <header class="bg-white px-8 py-6 flex justify-between items-center sticky top-0 z-20 shadow-sm border-b border-gray-50">
+            <div>
+                <h2 class="text-2xl font-bold text-gray-900">Welcome back, {{ request.user.first_name|default:request.user.username }}</h2>
+                <p class="text-sm text-gray-500 font-medium">System overview and management dashboard.</p>
+            </div>
+            <div class="flex items-center gap-6">
+                <!-- Notifications -->
+                <button class="relative p-2 text-gray-400 hover:text-gray-600 transition">
+                    <span class="text-2xl">🔔</span>
+                    <span class="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
+                </button>
+                
+                <!-- Profile Dropdown -->
+                <div class="relative">
+                    <button onclick="toggleAdminDropdown()" id="adminProfileButton"
+                        class="w-12 h-12 rounded-full bg-black flex items-center justify-center text-white font-bold text-lg cursor-pointer hover:scale-105 transition shadow-lg focus:outline-none">
+                        {{ request.user.username|slice:":1"|upper }}
+                    </button>
+                    
+                    <!-- Dropdown Menu -->
+                    <div id="adminProfileMenu"
+                        class="hidden absolute right-0 mt-3 w-56 bg-white rounded-2xl shadow-2xl border border-gray-50 py-3 z-50 transform origin-top-right transition-all">
+                        <div class="px-6 py-3 border-b border-gray-50 mb-2">
+                            <p class="text-xs font-bold text-gray-400 uppercase tracking-widest">Signed in as</p>
+                            <p class="text-sm font-bold text-gray-900 truncate">{{ request.user.email }}</p>
+                        </div>
+                        <a href="#" onclick="showSection('profile', null); toggleAdminDropdown()"
+                            class="flex items-center px-6 py-3 text-sm font-bold text-gray-500 hover:bg-gray-50 hover:text-black transition">
+                            My Profile
+                        </a>
+                        <div class="px-2 mt-2 pt-2 border-t border-gray-50">
+                            <form action="{% url 'logout' %}" method="post">
+                                {% csrf_token %}
+                                <button type="submit"
+                                    class="w-full flex items-center px-4 py-3 text-sm font-bold text-red-500 hover:bg-red-50 rounded-xl transition">
+                                    Logout
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <div class="max-w-7xl mx-auto p-8">
+
+            {% if messages %}
+            <div class="mb-8">
+                {% for message in messages %}
+                <div
+                    class="p-4 rounded-xl mb-2 {% if message.tags == 'success' %}bg-green-100 text-green-800 border-green-200{% else %}bg-orange-100 text-orange-800 border-orange-200{% endif %} border">
+                    {{ message }}
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <!-- Overview Section -->
+            <div id="section-overview" class="content-section">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+                    <div class="bg-white rounded-[2rem] p-8 shadow-sm border border-gray-50 flex items-center group hover:shadow-md transition-all">
+                        <div class="p-5 bg-blue-50 rounded-2xl text-blue-600 text-3xl mr-6 group-hover:scale-110 transition-transform">👥</div>
+                        <div>
+                            <p class="text-gray-400 text-xs font-bold uppercase tracking-widest mb-1">Total Users</p>
+                            <h3 class="text-3xl font-bold text-gray-900">{{ total_users }}</h3>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-[2rem] p-8 shadow-sm border border-gray-50 flex items-center group hover:shadow-md transition-all">
+                        <div class="p-5 bg-orange-50 rounded-2xl text-orange-600 text-3xl mr-6 group-hover:scale-110 transition-transform">⏳</div>
+                        <div>
+                            <p class="text-gray-400 text-xs font-bold uppercase tracking-widest mb-1">Pending Approvals</p>
+                            <h3 class="text-3xl font-bold text-gray-900">{{ pending_teachers.count }}</h3>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-[2rem] p-8 shadow-sm border border-gray-50 flex items-center group hover:shadow-md transition-all">
+                        <div class="p-5 bg-green-50 rounded-2xl text-green-600 text-3xl mr-6 group-hover:scale-110 transition-transform">🛡️</div>
+                        <div>
+                            <p class="text-gray-400 text-xs font-bold uppercase tracking-widest mb-1">Superusers</p>
+                            <h3 class="text-3xl font-bold text-gray-900">1</h3>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-[2.5rem] shadow-sm border border-gray-50 overflow-hidden mb-12">
+                    <div class="px-8 py-8 border-b border-gray-50 flex justify-between items-center">
+                        <div>
+                            <h2 class="text-xl font-bold text-gray-900">Recent Security Events</h2>
+                            <p class="text-sm text-gray-400 font-medium">Latest administrative activities across the system.</p>
+                        </div>
+                        <button onclick="showSection('audit', document.querySelector('a[onclick*=\'audit\']'))"
+                            class="bg-black text-white px-6 py-3 rounded-xl font-bold text-sm hover:bg-gray-800 transition shadow-lg">
+                            View Full Log
+                        </button>
+                    </div>
+                    <div class="divide-y divide-slate-100">
+                        {% for log in audit_logs|slice:":5" %}
+                        <div class="p-4 hover:bg-slate-50 flex items-center">
+                            <div class="w-2 h-2 rounded-full bg-blue-500 mr-4"></div>
+                            <div class="flex-1">
+                                <p class="text-sm font-medium text-slate-900">{{ log.action }}</p>
+                                <p class="text-xs text-slate-500">{{ log.details }}</p>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-xs text-slate-400">{{ log.timestamp|date:"M d, H:i" }}</p>
+                                <p class="text-[10px] font-bold text-slate-400 capitalize">{{ log.user.username }}</p>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="p-8 text-center text-slate-500 italic">No security events logged.</div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Teachers Section -->
+            <div id="section-teachers" class="content-section hidden">
+                <div class="mb-12">
+                    <h1 class="text-3xl font-bold text-gray-900">Teacher Approvals</h1>
+                    <p class="text-gray-500 font-medium mt-2">Review and manage registration requests from educators.</p>
+                </div>
+
+                <div class="bg-white rounded-[2.5rem] shadow-sm border border-gray-50 overflow-hidden">
+                    <table class="w-full text-left">
+                        <thead class="bg-gray-50/50 text-gray-400 text-[10px] uppercase font-bold tracking-widest">
+                            <tr>
+                                <th class="px-8 py-6">Teacher Name</th>
+                                <th class="px-8 py-6">Email</th>
+                                <th class="px-8 py-6">Joined At</th>
+                                <th class="px-8 py-6 text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 text-sm">
+                            {% for profile in pending_teachers %}
+                            <tr class="hover:bg-slate-50">
+                                <td class="p-6 font-medium text-slate-900">{{
+                                    profile.user.first_name|default:profile.user.username }}</td>
+                                <td class="p-6 text-slate-600">{{ profile.user.email }}</td>
+                                <td class="p-6 text-slate-500">{{ profile.user.date_joined|date:"M d, Y" }}</td>
+                                <td class="px-8 py-6 text-right space-x-3">
+                                    <form action="{% url 'approve_teacher' profile.user.id %}" method="POST"
+                                        class="inline">
+                                        {% csrf_token %}
+                                        <button
+                                            class="bg-black text-white px-6 py-2.5 rounded-xl font-bold text-xs hover:bg-gray-800 transition shadow-md">Approve</button>
+                                    </form>
+                                    <form action="{% url 'reject_teacher' profile.user.id %}" method="POST"
+                                        class="inline">
+                                        {% csrf_token %}
+                                        <button
+                                            class="bg-gray-100 text-gray-600 px-6 py-2.5 rounded-xl font-bold text-xs hover:bg-gray-200 transition">Reject</button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4" class="p-12 text-center text-slate-500">No pending teacher requests.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Users Section -->
+            <div id="section-users" class="content-section hidden">
+                <div class="mb-12">
+                    <h1 class="text-3xl font-bold text-gray-900">User Management</h1>
+                    <p class="text-gray-500 font-medium mt-2">Manage all users, roles, and account status.</p>
+                </div>
+
+                <!-- Stats Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+                    <div class="bg-white rounded-[2rem] p-8 shadow-sm border border-gray-50 text-center hover:shadow-md transition-shadow">
+                        <h3 class="text-5xl font-bold text-black mb-3">{{ total_users }}</h3>
+                        <p class="text-gray-400 text-xs font-bold uppercase tracking-widest">Total Users</p>
+                    </div>
+                    <div class="bg-white rounded-[2rem] p-8 shadow-sm border border-gray-50 text-center hover:shadow-md transition-shadow">
+                        <h3 class="text-5xl font-bold text-black mb-3">{{ teachers_count }}</h3>
+                        <p class="text-gray-400 text-xs font-bold uppercase tracking-widest">Teachers</p>
+                    </div>
+                    <div class="bg-white rounded-[2rem] p-8 shadow-sm border border-gray-50 text-center hover:shadow-md transition-shadow">
+                        <h3 class="text-5xl font-bold text-black mb-3">{{ students_count }}</h3>
+                        <p class="text-gray-400 text-xs font-bold uppercase tracking-widest">Students</p>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-[2.5rem] shadow-sm border border-gray-50 overflow-hidden">
+                    <table class="w-full text-left">
+                        <thead class="bg-gray-50/50 text-gray-400 text-[10px] uppercase font-bold tracking-widest">
+                            <tr>
+                                <th class="px-8 py-6">User</th>
+                                <th class="px-8 py-6">Role</th>
+                                <th class="px-8 py-6">Status</th>
+                                <th class="px-8 py-6 text-right">Access</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 text-sm">
+                            {% for u in all_users %}
+                            <tr class="hover:bg-slate-50">
+                                <td class="p-6">
+                                    <p class="font-bold text-slate-900">{{ u.username }}</p>
+                                    <p class="text-xs text-slate-500">{{ u.email }}</p>
+                                </td>
+                                <td class="p-6">
+                                    {% if u.is_superuser %}
+                                    <span
+                                        class="px-2 py-1 rounded-full text-[10px] font-bold uppercase bg-slate-900 text-white">Admin</span>
+                                    {% else %}
+                                    <span
+                                        class="px-2 py-1 rounded-full text-[10px] font-bold uppercase {% if u.profile.role == 'teacher' %}bg-purple-100 text-purple-700{% else %}bg-blue-100 text-blue-700{% endif %}">
+                                        {{ u.profile.role }}
+                                    </span>
+                                    {% endif %}
+                                </td>
+                                <td class="p-6">
+                                    {% if u.is_active %}
+                                    <span class="flex items-center text-green-600 font-bold"><span
+                                            class="w-2 h-2 rounded-full bg-green-600 mr-2"></span> Active</span>
+                                    {% else %}
+                                    <span class="flex items-center text-slate-400 font-bold"><span
+                                            class="w-2 h-2 rounded-full bg-slate-400 mr-2"></span> Inactive</span>
+                                    {% endif %}
+                                </td>
+                                <td class="px-8 py-6 text-right">
+                                    {% if not u.is_superuser %}
+                                    <form action="{% url 'toggle_user_status' u.id %}" method="POST">
+                                        {% csrf_token %}
+                                        <button
+                                            class="text-xs font-bold px-5 py-2.5 rounded-xl transition-all {% if u.is_active %}bg-red-50 text-red-600 hover:bg-red-600 hover:text-white{% else %}bg-black text-white hover:bg-gray-800{% endif %}">
+                                            {% if u.is_active %}Deactivate{% else %}Activate{% endif %}
+                                        </button>
+                                    </form>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Certificates Section -->
+            <div id="section-certificates" class="content-section hidden">
+                <div class="mb-12">
+                    <h1 class="text-3xl font-bold text-gray-900">Certificates</h1>
+                    <p class="text-gray-500 font-medium mt-2">Manage and revoke issued certificates.</p>
+                </div>
+
+                <div class="bg-white rounded-[2.5rem] shadow-sm border border-gray-50 overflow-hidden">
+                    <table class="w-full text-left">
+                        <thead class="bg-gray-50/50 text-gray-400 text-[10px] uppercase font-bold tracking-widest">
+                            <tr>
+                                <th class="px-8 py-6">Student</th>
+                                <th class="px-8 py-6">Course</th>
+                                <th class="px-8 py-6">Issued On</th>
+                                <th class="px-8 py-6">Status</th>
+                                <th class="px-8 py-6 text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 text-sm">
+                            {% for cert in certificates %}
+                            <tr class="hover:bg-slate-50">
+                                <td class="p-6 font-bold text-slate-900">{{ cert.student.username }}</td>
+                                <td class="p-6 text-slate-600">{{ cert.course_name }}</td>
+                                <td class="p-6 text-slate-500">{{ cert.issued_at|date:"M d, Y" }}</td>
+                                <td class="p-6">
+                                    {% if cert.is_revoked %}
+                                    <span class="text-red-600 font-bold">Revoked</span>
+                                    {% else %}
+                                    <span class="text-green-600 font-bold">Active</span>
+                                    {% endif %}
+                                </td>
+                                <td class="p-6 text-right">
+                                    {% if not cert.is_revoked %}
+                                    <form action="{% url 'revoke_certificate' cert.id %}" method="POST">
+                                        {% csrf_token %}
+                                        <button
+                                            class="text-xs font-bold text-red-500 hover:text-red-700">Revoke</button>
+                                    </form>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5" class="p-12 text-center text-slate-500">No certificates issued yet.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Audit Log Section -->
+            <div id="section-audit" class="content-section hidden">
+                <div class="mb-12">
+                    <h1 class="text-3xl font-bold text-gray-900">System Audit Logs</h1>
+                    <p class="text-gray-500 font-medium mt-2">Enterprise-grade record of administrative operations.</p>
+                </div>
+
+                <!-- Filter Bar -->
+                <div class="bg-white rounded-[2rem] p-8 shadow-sm border border-gray-50 mb-10">
+                    <form method="GET" action="{% url 'admin_dashboard' %}" class="flex flex-wrap items-end gap-6">
+                        <input type="hidden" name="section" value="audit">
+                        <div class="flex-1 min-w-[200px]">
+                            <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3">Time Range</label>
+                            <select name="time_range" class="w-full px-5 py-4 rounded-xl border border-gray-100 bg-gray-50/50 focus:bg-white focus:ring-2 focus:ring-black transition outline-none text-sm font-bold">
+                                <option value="Today" {% if current_filters.time_range == 'Today' %}selected{% endif %}>Today</option>
+                                <option value="Last 7 Days" {% if current_filters.time_range == 'Last 7 Days' %}selected{% endif %}>Last 7 Days</option>
+                                <option value="Last 30 Days" {% if current_filters.time_range == 'Last 30 Days' %}selected{% endif %}>Last 30 Days</option>
+                            </select>
+                        </div>
+                        <div class="flex-[3] min-w-[400px]">
+                            <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3">Search</label>
+                            <input type="text" name="search" value="{{ current_filters.search }}" placeholder="Search by admin email or message..." 
+                                class="w-full px-5 py-4 rounded-xl border border-gray-100 bg-gray-50/50 focus:bg-white focus:ring-2 focus:ring-black transition outline-none text-sm font-bold">
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <button type="submit" class="bg-black text-white px-10 py-4 rounded-xl font-bold hover:bg-gray-800 transition shadow-lg transform hover:-translate-y-0.5">Filter</button>
+                            <a href="?section=audit" class="text-gray-400 hover:text-black font-bold text-sm px-4">Reset</a>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="bg-white rounded-[2.5rem] border border-gray-50 overflow-hidden shadow-sm mb-12">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-gray-50/50 text-gray-400 text-[10px] uppercase font-bold tracking-widest border-b border-gray-50 text-left">
+                                    <th class="px-8 py-6">Timestamp</th>
+                                    <th class="px-8 py-6">Admin User</th>
+                                    <th class="px-8 py-6">Action</th>
+                                    <th class="px-8 py-6">Details</th>
+</tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100 text-sm">
+                                {% for log in logs %}
+                                <tr class="hover:bg-gray-50 transition">
+                                    <td class="px-8 py-6 text-gray-500 font-mono text-xs">{{ log.created_at|date:"Y-m-d H:i:s" }}</td>
+                                    <td class="px-8 py-6 font-bold text-gray-900">{{ log.performed_by }}</td>
+                                    <td class="px-8 py-6">
+                                        <span class="badge badge-{{ log.severity|lower }}">
+                                            {{ log.action_type }}
+                                        </span>
+                                    </td>
+                                    <td class="px-8 py-6 text-gray-600 line-clamp-1 max-w-xs" title="{{ log.message }}">
+                                        {{ log.message|truncatechars:80 }}
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="4" class="p-20 text-center text-slate-400 font-medium">
+                                        <div class="text-4xl mb-4">🔍</div>
+                                        No audit logs found matching your criteria.
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Pagination Navigation -->
+                    {% if logs.has_other_pages %}
+                    <div class="px-8 py-8 border-t border-gray-50 bg-gray-50/30 flex items-center justify-between">
+                        <div class="text-xs text-gray-400 font-bold uppercase tracking-widest">
+                            Showing {{ logs.start_index }} to {{ logs.end_index }} of {{ logs.paginator.count }} logs
+                        </div>
+                        <div class="flex gap-2">
+                            {% if logs.has_previous %}
+                            <a href="?section=audit&page={{ logs.previous_page_number }}&time_range={{ current_filters.time_range }}&search={{ current_filters.search }}"
+                                class="w-10 h-10 rounded-xl border border-gray-100 flex items-center justify-center hover:bg-white hover:shadow-md transition-all text-gray-600 font-bold">
+                                &lt;
+                            </a>
+                            {% endif %}
+                            
+                            {% for num in logs.paginator.page_range %}
+                                {% if logs.number == num %}
+                                <span class="w-10 h-10 rounded-xl bg-black text-white flex items-center justify-center text-sm font-bold shadow-lg">{{ num }}</span>
+                                {% elif num > logs.number|add:'-3' and num < logs.number|add:'3' %}
+                                <a href="?section=audit&page={{ num }}&time_range={{ current_filters.time_range }}&search={{ current_filters.search }}"
+                                    class="w-10 h-10 rounded-xl border border-gray-100 flex items-center justify-center hover:bg-white hover:shadow-md transition-all text-gray-400 font-bold text-sm">{{ num }}</a>
+                                {% endif %}
+                            {% endfor %}
+
+                            {% if logs.has_next %}
+                            <a href="?section=audit&page={{ logs.next_page_number }}&time_range={{ current_filters.time_range }}&search={{ current_filters.search }}"
+                                class="w-10 h-10 rounded-xl border border-gray-100 flex items-center justify-center hover:bg-white hover:shadow-md transition-all text-gray-600 font-bold">
+                                &gt;
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Profile & Account Settings Section -->
+            <div id="section-profile" class="content-section hidden">
+                <div class="mb-8">
+                    <h1 class="text-3xl font-bold text-slate-900">Profile Settings</h1>
+                    <p class="text-slate-500 mt-1">Manage your administrative account and profile.</p>
+                </div>
+
+                <div
+                    class="bg-white rounded-3xl shadow-lg border border-slate-100 overflow-hidden flex flex-col md:flex-row">
+                    <!-- Settings Sidebar -->
+                    <aside class="w-full md:w-64 border-r border-slate-100 bg-slate-50/50">
+                        <nav class="p-4 space-y-1">
+                            <button onclick="showSettingsTab('profile-personal', this)"
+                                class="settings-tab-link active w-full flex items-center px-4 py-3 text-sm font-semibold rounded-xl text-blue-600 bg-blue-50 transition-colors">
+                                Profile
+                            </button>
+                            <button onclick="showSettingsTab('profile-account', this)"
+                                class="settings-tab-link w-full flex items-center px-4 py-3 text-sm font-semibold rounded-xl text-slate-600 hover:bg-slate-100 transition-colors">
+                                Account
+                            </button>
+                        </nav>
+                    </aside>
+
+                    <!-- Settings Content -->
+                    <div class="flex-1 p-8">
+                        <!-- Profile Tab Content -->
+                        <div id="settings-profile-personal" class="settings-tab-content">
+                            <div class="max-w-2xl">
+                                <h2 class="text-xl font-bold text-slate-900 mb-6">Personal Information</h2>
+
+                                <form class="space-y-6" action="{% url 'update_profile' %}" method="POST"
+                                    enctype="multipart/form-data">
+                                    {% csrf_token %}
+                                    <div class="flex items-center space-x-6">
+                                        <div class="relative group">
+                                            <div
+                                                class="w-24 h-24 rounded-full bg-blue-100 flex items-center justify-center text-3xl border-4 border-white shadow-sm overflow-hidden text-blue-600 font-bold">
+                                                {% if user.profile.profile_picture %}
+                                                <img src="{{ user.profile.profile_picture.url }}" alt="Profile Photo"
+                                                    class="w-full h-full object-cover">
+                                                {% else %}
+                                                {{
+                                                request.user.first_name|default:request.user.username|slice:":1"|upper
+                                                }}
+                                                {% endif %}
+                                            </div>
+                                            <label for="admin-photo-upload"
+                                                class="absolute bottom-0 right-0 bg-blue-600 text-white p-2 rounded-full shadow-lg cursor-pointer transform hover:scale-110 transition">
+                                                📸
+                                                <input type="file" id="admin-photo-upload" name="profile_picture"
+                                                    class="hidden" accept="image/*">
+                                            </label>
+                                        </div>
+                                        <div>
+                                            <h4 class="text-sm font-bold text-slate-900">Profile Photo</h4>
+                                            <p class="text-xs text-slate-500 mt-1">Update your administrative avatar.
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <div class="col-span-2">
+                                            <label class="block text-sm font-bold text-slate-700 mb-2">Display
+                                                Name</label>
+                                            <input type="text" name="first_name" value="{{ request.user.first_name }}"
+                                                class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition outline-none">
+                                        </div>
+                                        <div class="col-span-2">
+                                            <label class="block text-sm font-bold text-slate-700 mb-2">Bio / Admin
+                                                Role</label>
+                                            <input type="text" name="designation" value="{{ user.profile.designation }}"
+                                                placeholder="e.g. System Administrator"
+                                                class="w-full px-4 py-3 rounded-xl border border-slate-200 mb-4 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition outline-none">
+                                            <textarea rows="4" name="bio" placeholder="Administrative notes/bio..."
+                                                class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition outline-none resize-none">{{ user.profile.bio }}</textarea>
+                                        </div>
+                                    </div>
+
+                                    <div class="pt-4">
+                                        <button type="submit"
+                                            class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-xl shadow-lg transition transform hover:-translate-y-1">
+                                            Save Profile
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
+                        <!-- Account Tab Content -->
+                        <div id="settings-profile-account" class="settings-tab-content hidden">
+                            <div class="max-w-2xl">
+                                <h2 class="text-xl font-bold text-slate-900 mb-6">Account Security</h2>
+
+                                <div class="space-y-8">
+                                    <form class="space-y-4" action="{% url 'update_email' %}" method="POST">
+                                        {% csrf_token %}
+                                        <h3 class="text-sm font-bold text-slate-400 uppercase tracking-wider">Email
+                                            Address</h3>
+                                        <div>
+                                            <label class="block text-sm font-bold text-slate-700 mb-2">Admin Contact
+                                                Email</label>
+                                            <input type="email" name="email" value="{{ request.user.email }}"
+                                                class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition outline-none">
+                                        </div>
+                                        <button type="submit"
+                                            class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-xl transition">
+                                            Update Email
+                                        </button>
+                                    </form>
+
+                                    <hr class="border-slate-100">
+
+                                    <form class="space-y-4" action="{% url 'update_password' %}" method="POST">
+                                        {% csrf_token %}
+                                        <h3 class="text-sm font-bold text-slate-400 uppercase tracking-wider">Change
+                                            Administrator Password</h3>
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div class="col-span-2">
+                                                <label class="block text-sm font-bold text-slate-700 mb-2">Current
+                                                    Password</label>
+                                                <input type="password" name="old_password" placeholder="••••••••"
+                                                    class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition outline-none">
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-bold text-slate-700 mb-2">New
+                                                    Password</label>
+                                                <input type="password" name="new_password1" placeholder="••••••••"
+                                                    class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition outline-none">
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-bold text-slate-700 mb-2">Confirm New
+                                                    Password</label>
+                                                <input type="password" name="new_password2" placeholder="••••••••"
+                                                    class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition outline-none">
+                                            </div>
+                                        </div>
+                                        <button type="submit"
+                                            class="bg-slate-900 hover:bg-black text-white font-bold py-2 px-6 rounded-xl transition">
+                                            Change Password
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- System Settings Section -->
+            <div id="section-settings" class="content-section hidden">
+                <div class="mb-12">
+                    <h1 class="text-3xl font-bold text-gray-900">System Configuration</h1>
+                    <p class="text-gray-500 font-medium mt-2">Global variables and security parameters.</p>
+                </div>
+
+                <div class="bg-white rounded-[2.5rem] p-10 shadow-sm border border-gray-50">
+                    <form action="{% url 'update_system_settings' %}" method="POST" class="space-y-8">
+                        {% csrf_token %}
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
+                            <div>
+                                <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Token Expiry
+                                    (Minutes)</label>
+                                <input type="number" name="token_expiry"
+                                    value="{% for s in settings %}{% if s.key == 'token_expiry' %}{{ s.value }}{% endif %}{% endfor %}"
+                                    placeholder="1440"
+                                    class="w-full px-6 py-4 rounded-xl border border-gray-100 bg-gray-50/50 focus:bg-white focus:ring-2 focus:ring-black outline-none transition-all">
+                                <p class="text-xs text-gray-400 mt-2">Duration for student session tokens.</p>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Certificate Signer
+                                    Name</label>
+                                <input type="text" name="cert_signer"
+                                    value="{% for s in settings %}{% if s.key == 'cert_signer' %}{{ s.value }}{% endif %}{% endfor %}"
+                                    placeholder="Adaptive LMS Admin"
+                                    class="w-full px-6 py-4 rounded-xl border border-gray-100 bg-gray-50/50 focus:bg-white focus:ring-2 focus:ring-black outline-none transition-all">
+                                <p class="text-xs text-gray-400 mt-2">Official name displayed on certificates.</p>
+                            </div>
+                            <div class="md:col-span-2">
+                                <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Maintenance Mode
+                                    Notification</label>
+                                <textarea name="maintenance_msg" rows="4"
+                                    class="w-full px-6 py-4 rounded-xl border border-gray-100 bg-gray-50/50 focus:bg-white focus:ring-2 focus:ring-black outline-none transition-all resize-none">{% for s in settings %}{% if s.key == 'maintenance_msg' %}{{ s.value }}{% endif %}{% endfor %}</textarea>
+                            </div>
+                        </div>
+                        <div class="pt-8 border-t border-gray-50 flex justify-end">
+                            <button type="submit"
+                                class="bg-black text-white font-bold py-4 px-12 rounded-xl shadow-lg hover:bg-gray-800 transition transform hover:-translate-y-1">
+                                Update Global Config
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </main>
+</div>
+
+<script>
+    function showSection(sectionId, linkElement) {
+        // Hide all sections
+        document.querySelectorAll('.content-section').forEach(el => {
+            el.classList.add('hidden');
+        });
+
+        // Show target section
+        document.getElementById('section-' + sectionId).classList.remove('hidden');
+
+        // Update active class on links
+        document.querySelectorAll('.sidebar-link').forEach(el => {
+            el.classList.remove('bg-black', 'text-white');
+            el.classList.add('text-gray-400', 'hover:bg-gray-100', 'hover:text-gray-900');
+        });
+
+        // Add active class to clicked link
+        if (linkElement) {
+            linkElement.classList.remove('text-gray-400', 'hover:bg-gray-100', 'hover:text-gray-900');
+            linkElement.classList.add('bg-black', 'text-white');
+        }
+    }
+
+    function toggleAdminDropdown() {
+        const menu = document.getElementById('adminProfileMenu');
+        menu.classList.toggle('hidden');
+    }
+
+    // Close dropdown when clicking outside
+    window.addEventListener('click', function (e) {
+        const button = document.getElementById('adminProfileButton');
+        const menu = document.getElementById('adminProfileMenu');
+        if (button && menu && !button.contains(e.target) && !menu.contains(e.target)) {
+            menu.classList.add('hidden');
+        }
+    });
+
+    // Auto-switch to section based on URL parameter
+    document.addEventListener('DOMContentLoaded', function () {
+        const urlParams = new URLSearchParams(window.location.search);
+        const section = urlParams.get('section');
+        if (section) {
+            const link = document.querySelector(`a[onclick*="showSection('${section}'"]`);
+            if (link) {
+                showSection(section, link);
+            }
+        }
+    });
+
+    function showSettingsTab(tabId, buttonElement) {
+        // Hide all settings tab content in the profile section
+        document.querySelectorAll('#section-profile .settings-tab-content').forEach(el => {
+            el.classList.add('hidden');
+        });
+
+        // Show target settings tab content
+        const target = document.getElementById('settings-' + tabId);
+        if (target) {
+            target.classList.remove('hidden');
+        }
+
+        // Update active class on settings buttons
+        document.querySelectorAll('#section-profile .settings-tab-link').forEach(el => {
+            el.classList.remove('active', 'bg-blue-50', 'text-blue-600');
+            el.classList.add('text-slate-600', 'hover:bg-slate-100');
+        });
+
+        // Add active class to clicked button
+        if (buttonElement) {
+            buttonElement.classList.add('active', 'bg-blue-50', 'text-blue-600');
+            buttonElement.classList.remove('text-slate-600', 'hover:bg-slate-100');
+        }
+    }
+</script>
+{% endblock %}
+
+{% block footer %}
+{% endblock %}

@@ -1,0 +1,3 @@
+﻿STATUS: 200
+FULL CONTENT:
+{"error":"Access control exception","errorcode":"accessexception","stacktrace":"* line 60 of \\webservice\\pluginfile.php: webservice_access_exception thrown\n","debuginfo":"Web service file downloading must be enabled in external service settings\r\nError code: accessexception","reproductionlink":"http:\/\/localhost\/moodle\/"}

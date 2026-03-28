@@ -1,0 +1,723 @@
+{% extends 'base.html' %}
+
+{% block title %}Teacher Dashboard | Adaptive Learning LMS{% endblock %}
+
+{% block navbar %}
+{% include 'partials/navbar_dashboard.html' %}
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 flex">
+
+    <!-- Sidebar -->
+    <aside
+        class="w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 min-h-screen fixed left-0 top-0 bottom-0 pt-16 hidden md:block z-10 transition-colors duration-200">
+        <div class="px-6 py-4">
+            <h2 class="text-xs uppercase text-gray-400 font-bold tracking-wider mb-4">Instructor Menu</h2>
+            <nav class="space-y-2">
+                <a href="?section=dashboard" onclick="showSection('dashboard', this); return false;"
+                    class="sidebar-link {% if active_page == 'dashboard' or not active_page %}active bg-blue-50 text-blue-600{% else %}text-gray-600 hover:bg-gray-50 hover:text-gray-900{% endif %} flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-colors">
+                    <span class="mr-3 text-lg">📊</span> Dashboard
+                </a>
+                <a href="?section=courses" onclick="showSection('courses', this); return false;"
+                    class="sidebar-link {% if active_page == 'courses' %}active bg-blue-50 text-blue-600{% else %}text-gray-600 hover:bg-gray-50 hover:text-gray-900{% endif %} flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-colors">
+                    <span class="mr-3 text-lg">📚</span> Courses
+                </a>
+                <a href="?section=analytics" onclick="showSection('analytics', this); return false;"
+                    class="sidebar-link {% if active_page == 'analytics' %}active bg-blue-50 text-blue-600{% else %}text-gray-600 hover:bg-gray-50 hover:text-gray-900{% endif %} flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-colors">
+                    <span class="mr-3 text-lg">📈</span> Analytics
+                </a>
+                <a href="/dashboard/teacher/?section=certificates"
+                    class="sidebar-link {% if active_page == 'certificates' %}active bg-blue-50 text-blue-600{% else %}text-gray-600 hover:bg-gray-50 hover:text-gray-900{% endif %} flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-colors">
+                    <span class="mr-3 text-lg">🏆</span> Certificates
+                </a>
+                <a href="?section=audits" onclick="showSection('audits', this); return false;"
+                    class="sidebar-link {% if active_page == 'audits' %}active bg-blue-50 text-blue-600{% else %}text-gray-600 hover:bg-gray-50 hover:text-gray-900{% endif %} flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-colors">
+                    <span class="mr-3 text-lg">📑</span> Audits
+                </a>
+                <a href="?section=settings" onclick="showSection('settings', this); return false;"
+                    class="sidebar-link {% if active_page == 'settings' %}active bg-blue-50 text-blue-600{% else %}text-gray-600 hover:bg-gray-50 hover:text-gray-900{% endif %} flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-colors">
+                    <span class="mr-3 text-lg">⚙️</span> Settings
+                </a>
+            </nav>
+        </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 md:ml-64 p-8 transition-all dark:bg-gray-900">
+        <div class="max-w-7xl mx-auto">
+
+            <!-- Header -->
+            {% if active_page == 'dashboard' %}
+            <div id="dashboard-header" class="pt-4 pb-2 mb-5">
+                <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
+                <p class="text-gray-500 dark:text-gray-400 mt-1">Welcome back! Here's your teaching overview.</p>
+            </div>
+            {% endif %}
+
+            <!-- Messages -->
+            {% if messages %}
+            <div class="mb-8">
+                {% for message in messages %}
+                <div
+                    class="p-4 rounded-xl mb-2 {% if message.tags == 'success' %}bg-green-100 text-green-800 border-green-200{% else %}bg-red-100 text-red-800 border-red-200{% endif %} border">
+                    {{ message }}
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <!-- Dashboard Section -->
+            <div id="section-dashboard" class="content-section">
+                <!-- Dash Stats -->
+
+                <!-- Stats Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                    <!-- Total Courses -->
+                    <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-gray-700 flex items-center transition hover:shadow-md">
+                        <div class="p-4 bg-blue-100 dark:bg-blue-900/30 rounded-xl text-blue-600 dark:text-blue-400 text-3xl mr-4">📚</div>
+                        <div>
+                            <p class="text-gray-500 dark:text-gray-400 text-sm font-medium">Total Courses</p>
+                            <h3 class="text-2xl font-bold text-gray-900 dark:text-white">{{ total_courses }}</h3>
+                        </div>
+                    </div>
+                    <!-- Total Students -->
+                    <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-gray-700 flex items-center transition hover:shadow-md">
+                        <div class="p-4 bg-green-100 dark:bg-green-900/30 rounded-xl text-green-600 dark:text-green-400 text-3xl mr-4">👨‍🎓</div>
+                        <div>
+                            <p class="text-gray-500 dark:text-gray-400 text-sm font-medium">Total Students</p>
+                            <h3 class="text-2xl font-bold text-gray-900 dark:text-white">{{ total_students }}</h3>
+                        </div>
+                    </div>
+                    <!-- Certificates Issued -->
+                    <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-gray-700 flex items-center transition hover:shadow-md">
+                        <div class="p-4 bg-purple-100 dark:bg-purple-900/30 rounded-xl text-purple-600 dark:text-purple-400 text-3xl mr-4">🏆</div>
+                        <div>
+                            <p class="text-gray-500 dark:text-gray-400 text-sm font-medium">Certificates Issued</p>
+                            <h3 class="text-2xl font-bold text-gray-900 dark:text-white">{{ certificates_issued }}</h3>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Activity Section -->
+                <div
+                    class="bg-white dark:bg-gray-800 rounded-3xl shadow-lg border border-gray-100 dark:border-gray-700 overflow-hidden">
+                    <div class="p-6 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center">
+                        <h2 class="text-xl font-bold text-gray-900 dark:text-white">Recent Activity</h2>
+                        <a href="#" class="text-blue-600 font-semibold hover:text-blue-800 text-sm">View All</a>
+                    </div>
+
+                    <div class="divide-y divide-gray-100">
+                        {% for log in recent_activities %}
+                        <div class="activity-item p-6 hover:bg-gray-50 transition duration-150 flex items-center">
+                            <div class="avatar flex-shrink-0 h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-lg">
+                                {{ log.user_name|first }}
+                            </div>
+                            <div class="activity-content ml-4 flex-1">
+                                <strong class="text-sm font-medium text-gray-900">{{ log.user_name }}</strong>
+                                <div class="text-sm text-gray-700">{{ log.action }} <span class="course-link font-semibold text-blue-600">{{ log.course_name }}</span></div>
+                                <div class="time text-xs text-gray-500 mt-1">{{ log.created_at|timesince }} ago</div>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="p-6 text-center text-gray-500">No recent activity</div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Courses Section -->
+            <div id="section-courses" class="content-section hidden">
+                <div class="mb-8 flex justify-between items-center">
+                    <div>
+                        <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Your Courses</h1>
+                        <p class="text-gray-500 dark:text-gray-400 mt-1">Manage and monitor all your created courses.</p>
+                    </div>
+                    <a href="{% url 'create_course' %}"
+                        class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-6 rounded-xl shadow-lg transition transform hover:-translate-y-1 inline-block">
+                        + New Course
+                    </a>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {% for course in courses %}
+                    <div
+                        class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden hover:shadow-md transition">
+                        <div class="p-6">
+                            <div
+                                class="h-12 w-12 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center text-blue-600 dark:text-blue-400 text-2xl mb-4">
+                                📚
+                            </div>
+                            <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2 line-clamp-1">
+                                {{ course.fullname }}</h3>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mb-6 line-clamp-2">
+                                {{ course.summary|striptags|safe }}</p>
+                            <div class="flex items-center justify-between pt-4 border-t border-gray-100 dark:border-gray-700">
+                                <span class="text-xs text-gray-400">ID: {{ course.id }}</span>
+                                <a href="/manage-course/{{ course.id }}/"
+                                    class="bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 font-semibold py-2 px-4 rounded-xl border border-gray-200 dark:border-gray-600 transition text-sm">Manage</a>
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div
+                        class="col-span-full bg-white dark:bg-gray-800 rounded-3xl p-20 text-center border-2 border-dashed border-gray-100 dark:border-gray-700">
+                        <div class="text-5xl mb-4 text-gray-300">📖</div>
+                        <h3 class="text-xl font-bold text-gray-800 dark:text-white">No courses found</h3>
+                        <p class="text-gray-500 dark:text-gray-400 mt-2 mb-8">Start by creating your first course right now.</p>
+                        <a href="{% url 'create_course' %}"
+                            class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-10 rounded-xl shadow-lg transition transform hover:-translate-y-1 inline-block">
+                            + Create Course
+                        </a>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Analytics Section -->
+            <div id="section-analytics" class="content-section hidden">
+                <!-- Header with Selector -->
+                <div class="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div>
+                        <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Analytics</h1>
+                        <p class="text-gray-500 dark:text-gray-400 mt-1">Deep dive into course performance and student engagement.</p>
+                    </div>
+                    <div class="relative max-w-xs w-full">
+                        <select id="analyticsCourseSelector"
+                            class="w-full pl-4 pr-10 py-3 rounded-2xl border border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm focus:ring-2 focus:ring-blue-500 outline-none transition appearance-none">
+                            <option value="">Select a Course...</option>
+                            {% for course in courses %}
+                            <option value="{{ course.id }}"
+                                {% if request.GET.course_id == course.id|stringformat:"s" %}
+                                    selected
+                                {% endif %}
+                            >{{ course.fullname }}</option>
+                            {% endfor %}
+                        </select>
+                        <div class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">▼</div>
+                    </div>
+                </div>
+
+                <!-- Summary Stats (Dynamic) -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                    <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 transition transform hover:-translate-y-1">
+                        <p class="text-gray-500 text-sm font-medium">Avg Watch Time</p>
+                        <h3 id="stat-avg-watch" class="text-2xl font-bold text-gray-900 dark:text-white mt-1">{{ avg_watch|default:0|floatformat:1 }}%</h3>
+                    </div>
+                    <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 transition transform hover:-translate-y-1">
+                        <p class="text-gray-500 text-sm font-medium">Completion Rate</p>
+                        <h3 id="stat-completion-rate" class="text-2xl font-bold text-gray-900 dark:text-white mt-1">{{ completion_rate|default:0|floatformat:1 }}%</h3>
+                    </div>
+                    <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 transition transform hover:-translate-y-1">
+                        <p class="text-gray-500 text-sm font-medium">Avg Watch (Mins)</p>
+                        <h3 id="stat-watch-mins" class="text-2xl font-bold text-gray-900 dark:text-white mt-1">0.0</h3>
+                    </div>
+                    <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 transition transform hover:-translate-y-1">
+                        <p class="text-gray-500 text-sm font-medium">Active Students</p>
+                        <h3 id="stat-active-students" class="text-2xl font-bold text-gray-900 dark:text-white mt-1">{{ active_students|default:0 }}</h3>
+                    </div>
+                </div>
+
+                <!-- Engagement Tables -->
+                <div class="grid grid-cols-1 xl:grid-cols-2 gap-8">
+                    <!-- Video Table -->
+                    <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+                        <div class="p-6 border-b border-gray-100 dark:border-gray-700">
+                            <h3 class="text-lg font-bold text-gray-900 dark:text-white">Video Engagement</h3>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left">
+                                <thead>
+                                    <tr class="bg-gray-50 dark:bg-gray-900/50 text-gray-400 text-xs font-bold uppercase tracking-wider">
+                                        <th class="px-6 py-4">Student</th>
+                                        <th class="px-6 py-4">Watch %</th>
+                                        <th class="px-6 py-4">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="videoStudentTableBody" class="divide-y divide-gray-50 dark:divide-gray-700">
+                                    {% if video_engagement_rows %}
+                                        {% for row in video_engagement_rows %}
+                                        <tr class="hover:bg-gray-50/50 dark:hover:bg-gray-700/50 transition">
+                                            <td class="px-6 py-4 text-sm font-semibold text-gray-900 dark:text-white">{{ row.student }}</td>
+                                            <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">{{ row.watch_percent }}%</td>
+                                            <td class="px-6 py-4">
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-900/40 text-blue-800 dark:text-blue-300">
+                                                    {{ row.status }}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    {% else %}
+                                        <tr><td colspan="3" class="px-6 py-10 text-center text-gray-400 italic">Select a course to view data</td></tr>
+                                    {% endif %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Quiz Table -->
+                    <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+                        <div class="p-6 border-b border-gray-100 dark:border-gray-700">
+                            <h3 class="text-lg font-bold text-gray-900 dark:text-white">Quiz Performance</h3>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left">
+                                <thead>
+                                    <tr class="bg-gray-50 dark:bg-gray-900/50 text-gray-400 text-xs font-bold uppercase tracking-wider">
+                                        <th class="px-6 py-4">Student</th>
+                                        <th class="px-6 py-4">Quiz</th>
+                                        <th class="px-6 py-4">Score</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="quizAttemptsTableBody" class="divide-y divide-gray-50 dark:divide-gray-700">
+                                    <tr><td colspan="3" class="px-6 py-10 text-center text-gray-400 italic">Select a course to view data</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Certificates Section -->
+            <div id="section-certificates" class="content-section hidden">
+                {% include 'teacher_certificates.html' %}
+            </div>
+
+            <!-- Audits Section -->
+            <div id="section-audits" class="content-section hidden">
+                <div class="mb-8 flex justify-between items-center">
+                    <div>
+                        <h1 class="text-3xl font-bold text-gray-900 dark:text-white">System Audits</h1>
+                        <p class="text-gray-500 dark:text-gray-400 mt-1">Detailed tracking of all system activities and student logs.</p>
+                    </div>
+                    <div class="flex space-x-3">
+                        <button
+                            class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 font-bold py-2.5 px-5 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition flex items-center shadow-sm">
+                            <span class="mr-2">📄</span> Export PDF
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Logs Table Section -->
+                <div
+                    class="bg-white dark:bg-gray-800 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+                    <div class="p-6 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center">
+                        <h2 class="text-xl font-bold text-gray-900 dark:text-white">System Logs & Activity</h2>
+                        <div class="relative">
+                            <input type="text" placeholder="Search logs..."
+                                class="pl-10 pr-4 py-2 border border-gray-200 dark:border-gray-700 rounded-xl text-sm bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all w-64">
+                            <span class="absolute left-3 top-2.5 text-gray-400">🔍</span>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left">
+                            <thead class="bg-gray-50 dark:bg-gray-900/50 text-xs uppercase text-gray-400 font-bold tracking-wider">
+                                <tr>
+                                    <th class="px-6 py-4">Timestamp</th>
+                                    <th class="px-6 py-4">Student</th>
+                                    <th class="px-6 py-4">Action</th>
+                                    <th class="px-6 py-4">Course</th>
+                                    <th class="px-6 py-4">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-50 dark:divide-gray-700">
+                                {% for activity in recent_activities %}
+                                <tr class="hover:bg-gray-50/50 dark:hover:bg-gray-700/50 transition">
+                                    <td class="px-6 py-4 text-gray-500 dark:text-gray-400 text-xs font-mono">{{ activity.created_at|timesince }} ago</td>
+                                    <td class="px-6 py-4">
+                                        <div class="flex items-center gap-3">
+                                            <div class="h-8 w-8 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400 font-bold text-xs">
+                                                {{ activity.user_name|first|upper }}
+                                            </div>
+                                            <span class="font-bold text-gray-900 dark:text-white">{{ activity.user_name }}</span>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 text-gray-600 dark:text-gray-400 text-sm">{{ activity.action }}</td>
+                                    <td class="px-6 py-4 text-blue-600 dark:text-blue-400 font-bold text-sm">{{ activity.course_name }}</td>
+                                    <td class="px-6 py-4">
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400">
+                                            <span class="w-1.5 h-1.5 bg-green-500 rounded-full mr-2"></span> Success
+                                        </span>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="5" class="px-8 py-12 text-center text-gray-400 font-medium italic">No activity logs found.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="p-6 border-t border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/50 text-center">
+                        <button class="text-blue-600 dark:text-blue-400 font-bold text-sm hover:text-blue-700 transition">Load More Activity</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Settings Section -->
+        <div id="section-settings" class="content-section hidden">
+            <div class="mb-12">
+                <h1 class="text-3xl font-bold text-gray-900">Settings</h1>
+                <p class="text-gray-500 font-medium mt-1">Manage your account and preferences.</p>
+            </div>
+
+            <div
+                class="bg-white dark:bg-gray-800 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden flex flex-col md:flex-row">
+                <!-- Settings Sidebar -->
+                <aside
+                    class="w-full md:w-64 border-r border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/50">
+                    <nav class="p-4 space-y-2">
+                        <button onclick="showSettingsTab('profile', this)"
+                            class="settings-tab-link active w-full flex items-center px-4 py-3 text-sm font-medium rounded-xl text-blue-600 bg-blue-50 dark:bg-blue-900/30 transition-all">
+                            <span class="mr-3 text-lg">👤</span> Profile
+                        </button>
+                        <button onclick="showSettingsTab('account', this)"
+                            class="settings-tab-link w-full flex items-center px-4 py-3 text-sm font-medium rounded-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all">
+                            <span class="mr-3 text-lg">🔒</span> Account
+                        </button>
+                        <button onclick="showSettingsTab('notifications', this)"
+                            class="settings-tab-link w-full flex items-center px-4 py-3 text-sm font-medium rounded-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all">
+                            <span class="mr-3 text-lg">🔔</span> Alerts
+                        </button>
+                    </nav>
+                </aside>
+
+                <!-- Settings Content -->
+                <div class="flex-1 p-10">
+                    <!-- Profile Tab Content -->
+                    <div id="settings-profile" class="settings-tab-content">
+                        <div class="max-w-2xl">
+                            <h2 class="text-xl font-bold text-gray-900 mb-8">Profile Settings</h2>
+
+                            <form class="space-y-8" action="{% url 'update_profile' %}" method="POST"
+                                enctype="multipart/form-data">
+                                {% csrf_token %}
+                                <div class="flex items-center space-x-8">
+                                    <div class="relative group">
+                                        <div
+                                            class="w-24 h-24 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-3xl border-4 border-white dark:border-gray-800 shadow-lg overflow-hidden text-blue-600 dark:text-blue-400 font-bold">
+                                            {% if user.profile.profile_picture %}
+                                            <img src="{{ user.profile.profile_picture.url }}" alt="Profile Photo"
+                                                class="w-full h-full object-cover">
+                                            {% else %}
+                                            <span id="profile-initials">{{
+                                                request.user.first_name|default:request.user.username|slice:":1"|upper
+                                                }}</span>
+                                            {% endif %}
+                                        </div>
+                                        <label for="photo-upload"
+                                            class="absolute bottom-0 right-0 bg-blue-600 text-white p-2 rounded-full shadow-lg cursor-pointer transform hover:scale-110 transition border-2 border-white dark:border-gray-800">
+                                            📸
+                                            <input type="file" id="photo-upload" name="profile_picture" class="hidden"
+                                                accept="image/*">
+                                        </label>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-lg font-bold text-gray-900">Profile Photo</h4>
+                                        <p class="text-sm text-gray-400 font-medium">JPG, GIF or PNG. Max size 2MB</p>
+                                    </div>
+                                </div>
+
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div class="col-span-2">
+                                        <label
+                                            class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Full Name</label>
+                                        <input type="text" name="first_name" value="{{ request.user.first_name }}"
+                                            class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none transition">
+                                    </div>
+                                    <div class="col-span-2">
+                                        <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Bio / Designation</label>
+                                        <input type="text" name="designation" value="{{ user.profile.designation }}"
+                                            placeholder="e.g. Senior Instructor"
+                                            class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 mb-4 transition outline-none">
+                                        <textarea rows="4" name="bio"
+                                            placeholder="Tell students about your expertise..."
+                                            class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 transition outline-none resize-none">{{ user.profile.bio }}</textarea>
+                                    </div>
+                                </div>
+
+                                <div class="pt-4">
+                                    <button type="submit"
+                                        class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-10 rounded-xl shadow-lg transition transform hover:-translate-y-0.5">
+                                        Save Changes
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Account Tab Content -->
+                    <div id="settings-account" class="settings-tab-content hidden">
+                        <div class="max-w-2xl">
+                            <h2 class="text-xl font-bold text-gray-900 mb-8">Account Security</h2>
+
+                            <form class="space-y-8" action="{% url 'update_password' %}" method="POST">
+                                {% csrf_token %}
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Email Address</label>
+                                    <input type="email" value="{{ request.user.email }}" disabled
+                                        class="w-full px-6 py-4 rounded-xl border border-gray-100 bg-gray-100 text-gray-400 outline-none cursor-not-allowed font-bold">
+                                    <p class="text-[10px] text-gray-400 mt-2 font-bold uppercase tracking-wider">Contact administrator to change email.</p>
+                                </div>
+
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                    <div class="col-span-2">
+                                        <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Current Password</label>
+                                        <input type="password" name="old_password" placeholder="••••••••"
+                                            class="w-full px-6 py-4 rounded-xl border border-gray-100 bg-gray-50/50 focus:bg-white focus:ring-2 focus:ring-black outline-none transition-all">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">New Password</label>
+                                        <input type="password" name="new_password1" placeholder="••••••••"
+                                            class="w-full px-6 py-4 rounded-xl border border-gray-100 bg-gray-50/50 focus:bg-white focus:ring-2 focus:ring-black outline-none transition-all">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Confirm New Password</label>
+                                        <input type="password" name="new_password2" placeholder="••••••••"
+                                            class="w-full px-6 py-4 rounded-xl border border-gray-100 bg-gray-50/50 focus:bg-white focus:ring-2 focus:ring-black outline-none transition-all">
+                                    </div>
+                                </div>
+
+                                <div class="pt-4">
+                                    <button type="submit"
+                                        class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-10 rounded-xl shadow-lg transition transform hover:-translate-y-0.5">
+                                        Update Password
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Notifications Tab Content -->
+                    <div id="settings-notifications" class="settings-tab-content hidden">
+                        <div class="max-w-2xl">
+                            <h2 class="text-xl font-bold text-gray-900 mb-8">Notification Preferences</h2>
+
+                            <div class="space-y-6">
+                                <div class="flex items-center justify-between p-6 bg-gray-50/50 rounded-[2rem] border border-gray-50">
+                                    <div>
+                                        <h4 class="font-bold text-gray-900">Push Notifications</h4>
+                                        <p class="text-sm text-gray-400 font-medium">Receive alerts for new student enrollments.</p>
+                                    </div>
+                                    <button class="w-14 h-8 bg-black rounded-full relative transition">
+                                        <span class="absolute right-1 top-1 w-6 h-6 bg-white rounded-full shadow-md"></span>
+                                    </button>
+                                </div>
+                                <div class="flex items-center justify-between p-6 bg-gray-50/50 rounded-[2rem] border border-gray-50">
+                                    <div>
+                                        <h4 class="font-bold text-gray-900">Email Reports</h4>
+                                        <p class="text-sm text-gray-400 font-medium">Weekly summary of course performance.</p>
+                                    </div>
+                                    <button class="w-14 h-8 bg-gray-200 rounded-full relative transition">
+                                        <span class="absolute left-1 top-1 w-6 h-6 bg-white rounded-full shadow-md"></span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Appearance Tab Content -->
+                </div>
+            </div>
+        </div>
+
+</div>
+</main>
+</div>
+
+<script>
+    function showSection(sectionId, linkElement) {
+        // Hide all sections
+        document.querySelectorAll('.content-section').forEach(el => {
+            el.classList.add('hidden');
+        });
+
+        // Show target section
+        document.getElementById('section-' + sectionId).classList.remove('hidden');
+
+        // Toggle dashboard header visibility
+        const dashboardHeader = document.getElementById('dashboard-header');
+        if (dashboardHeader) {
+            if (sectionId === 'dashboard') {
+                dashboardHeader.classList.remove('hidden');
+            } else {
+                dashboardHeader.classList.add('hidden');
+            }
+        }
+
+        // Update active class on links
+        document.querySelectorAll('.sidebar-link').forEach(el => {
+            el.classList.remove('active', 'bg-blue-50', 'text-blue-600', 'dark:bg-blue-900/30', 'dark:text-blue-400');
+            el.classList.add('text-gray-600', 'dark:text-gray-400', 'hover:bg-gray-50', 'dark:hover:bg-gray-700', 'hover:text-gray-900', 'dark:hover:text-white');
+        });
+
+        // Add active class to clicked link
+        linkElement.classList.remove('text-gray-600', 'dark:text-gray-400', 'hover:bg-gray-50', 'dark:hover:bg-gray-700', 'hover:text-gray-900', 'dark:hover:text-white');
+        linkElement.classList.add('active', 'bg-blue-50', 'text-blue-600', 'dark:bg-blue-900/30', 'dark:text-blue-400');
+    }
+
+    function activateSection(sectionId) {
+        const sectionEl = document.getElementById('section-' + sectionId);
+        if (!sectionEl) return;
+        document.querySelectorAll('.content-section').forEach(el => el.classList.add('hidden'));
+        sectionEl.classList.remove('hidden');
+
+        document.querySelectorAll('.sidebar-link').forEach(el => {
+            el.classList.remove('active', 'bg-blue-50', 'text-blue-600', 'dark:bg-blue-900/30', 'dark:text-blue-400');
+            el.classList.add('text-gray-600', 'dark:text-gray-400', 'hover:bg-gray-50', 'dark:hover:bg-gray-700', 'hover:text-gray-900', 'dark:hover:text-white');
+        });
+
+        const link = document.querySelector(`a[href$="?section=${sectionId}"]`);
+        if (link) {
+            link.classList.remove('text-gray-600', 'dark:text-gray-400', 'hover:bg-gray-50', 'dark:hover:bg-gray-700', 'hover:text-gray-900', 'dark:hover:text-white');
+            link.classList.add('active', 'bg-blue-50', 'text-blue-600', 'dark:bg-blue-900/30', 'dark:text-blue-400');
+        }
+    }
+
+    function showSettingsTab(tabId, buttonElement) {
+        // Hide all settings tab content
+        document.querySelectorAll('.settings-tab-content').forEach(el => {
+            el.classList.add('hidden');
+        });
+
+        // Show target settings tab content
+        document.getElementById('settings-' + tabId).classList.remove('hidden');
+
+        // Update active class on settings buttons
+        document.querySelectorAll('.settings-tab-link').forEach(el => {
+            el.classList.remove('active', 'bg-blue-50', 'text-blue-600', 'dark:bg-blue-900/30', 'dark:text-blue-400');
+            el.classList.add('text-gray-600', 'dark:text-gray-400', 'hover:bg-gray-50', 'dark:hover:bg-gray-700');
+        });
+
+        // Add active class to clicked button
+        buttonElement.classList.add('active', 'bg-blue-50', 'text-blue-600', 'dark:bg-blue-900/30', 'dark:text-blue-400');
+        buttonElement.classList.remove('text-gray-600', 'dark:text-gray-400', 'hover:bg-gray-100', 'dark:hover:bg-gray-700');
+    }
+
+    async function loadAnalytics(courseId) {
+        if (!courseId) return;
+
+        // Show loading state
+        const statIds = ['stat-avg-watch', 'stat-completion-rate', 'stat-watch-mins', 'stat-active-students'];
+        statIds.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.innerText = '...';
+        });
+        
+        try {
+            const response = await fetch(`/teacher/analytics/?course_id=${courseId}`);
+            const result = await response.json();
+            
+            if (result.success) {
+                const data = result.data;
+                // Update Stats
+                document.getElementById('stat-avg-watch').innerText = data.video_avg_watch + '%';
+                document.getElementById('stat-completion-rate').innerText = data.video_completion_rate + '%';
+                document.getElementById('stat-watch-mins').innerText = data.avg_watch_time;
+                document.getElementById('stat-active-students').innerText = data.total_active_students;
+
+                // Update Video Table
+                const vTableBody = document.getElementById('videoStudentTableBody');
+                if (vTableBody) {
+                    vTableBody.innerHTML = '';
+                    if (data.video_student_table.length > 0) {
+                        data.video_student_table.forEach(row => {
+                            vTableBody.innerHTML += `
+                                <tr class="hover:bg-gray-50 dark:hover:bg-gray-900/50 transition">
+                                    <td class="px-6 py-4 text-sm font-medium text-gray-900 dark:text-white">${row.student_name}</td>
+                                    <td class="px-6 py-4">
+                                        <div class="flex items-center gap-2">
+                                            <div class="w-24 bg-gray-100 dark:bg-gray-700 h-1.5 rounded-full overflow-hidden">
+                                                <div class="bg-blue-600 h-full" style="width: ${row.watch_percent}%"></div>
+                                            </div>
+                                            <span class="text-xs text-gray-500">${row.watch_percent}%</span>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <span class="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase ${row.status === 'Completed' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'}">
+                                            ${row.status}
+                                        </span>
+                                    </td>
+                                </tr>
+                            `;
+                        });
+                    } else {
+                        vTableBody.innerHTML = '<tr><td colspan="3" class="px-6 py-10 text-center text-gray-400 italic">No video watch data found for this course</td></tr>';
+                    }
+                }
+
+                // Update Quiz Table
+                const qTableBody = document.getElementById('quizAttemptsTableBody');
+                if (qTableBody) {
+                    qTableBody.innerHTML = '';
+                    if (data.quiz_attempts_table.length > 0) {
+                        data.quiz_attempts_table.forEach(row => {
+                            qTableBody.innerHTML += `
+                                <tr class="hover:bg-gray-50 dark:hover:bg-gray-900/50 transition">
+                                    <td class="px-6 py-4 text-sm font-medium text-gray-900 dark:text-white">${row.student_name}</td>
+                                    <td class="px-6 py-4 text-sm text-gray-500">${row.quiz_name}</td>
+                                    <td class="px-6 py-4">
+                                        <div class="flex items-center gap-2">
+                                            <span class="font-bold ${row.score >= 50 ? 'text-green-600' : 'text-red-600'}">${row.score}%</span>
+                                            <span class="text-[10px] text-gray-400">(${row.date})</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                            `;
+                        });
+                    } else {
+                        qTableBody.innerHTML = '<tr><td colspan="3" class="px-6 py-10 text-center text-gray-400 italic">No quiz attempts found for this course</td></tr>';
+                    }
+                }
+            } else {
+                console.error('Analytics Error:', result.error);
+                alert('Error loading analytics: ' + result.error);
+            }
+        } catch (err) {
+            console.error('Fetch Error:', err);
+            alert('Failed to fetch analytics data.');
+        }
+    }
+
+    // Close dropdown when clicking outside
+    window.addEventListener('click', function (e) {
+        const button = document.getElementById('profileDropdownButton');
+        const menu = document.getElementById('profileDropdownMenu');
+        if (button && !button.contains(e.target) && menu && !menu.contains(e.target)) {
+            menu.classList.add('hidden');
+        }
+    });
+
+    // Reload analytics page with selected course so backend gets course_id
+    const analyticsCourseSelector = document.getElementById('analyticsCourseSelector');
+    if (analyticsCourseSelector) {
+        analyticsCourseSelector.addEventListener('change', function() {
+            const courseId = this.value;
+            if (courseId) {
+                window.location.href = `/teacher/dashboard/?section=analytics&course_id=${courseId}`;
+            }
+        });
+    }
+
+    // Initialize correct section on load
+    document.addEventListener('DOMContentLoaded', function() {
+        const section = "{{ section|default:'dashboard' }}";
+        activateSection(section);
+
+        document.querySelectorAll('.sidebar-link').forEach(link => {
+            link.addEventListener('click', function(event) {
+                event.preventDefault();
+                const href = link.getAttribute('href');
+                const url = new URL(href, window.location.origin);
+                const selected = url.searchParams.get('section') || 'dashboard';
+                window.history.replaceState({}, '', `/dashboard/teacher/?section=${selected}`);
+                activateSection(selected);
+            });
+        });
+    });
+</script>
+{% endblock %}
+
+{% block footer %}
+{% endblock %}

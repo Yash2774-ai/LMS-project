@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block navbar %}
+    {% include 'partials/navbar_dashboard.html' %}
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 flex">
+    <aside class="w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 min-h-screen fixed left-0 top-0 bottom-0 pt-16 z-10">
+        <div class="px-6 py-4">
+            <h2 class="text-xs uppercase text-gray-400 font-bold tracking-wider mb-4">Instructor Menu</h2>
+            <nav class="space-y-2">
+                <a href="{% url 'teacher_dashboard' %}" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-colors {% if request.resolver_match.url_name == 'teacher_dashboard' %}bg-blue-50 text-blue-600{% else %}text-gray-600 hover:bg-gray-50 hover:text-gray-900{% endif %}">
+                    <span class="mr-3 text-lg">📊</span> Dashboard
+                </a>
+                <a href="{% url 'create_course' %}" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-colors {% if request.resolver_match.url_name == 'create_course' %}bg-blue-50 text-blue-600{% else %}text-gray-600 hover:bg-gray-50 hover:text-gray-900{% endif %}">
+                    <span class="mr-3 text-lg">📚</span> Courses
+                </a>
+                <a href="{% url 'teacher_analytics' %}" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-colors {% if request.resolver_match.url_name == 'teacher_analytics' %}bg-blue-50 text-blue-600{% else %}text-gray-600 hover:bg-gray-50 hover:text-gray-900{% endif %}">
+                    <span class="mr-3 text-lg">📈</span> Analytics
+                </a>
+                <a href="{% url 'teacher_certificates' %}" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-colors {% if request.resolver_match.url_name == 'teacher_certificates' %}bg-blue-50 text-blue-600{% else %}text-gray-600 hover:bg-gray-50 hover:text-gray-900{% endif %}">
+                    <span class="mr-3 text-lg">🏆</span> Certificates
+                </a>
+                <a href="{% url 'dashboard' %}?section=audits" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-colors text-gray-600 hover:bg-gray-50 hover:text-gray-900">
+                    <span class="mr-3 text-lg">📑</span> Audits
+                </a>
+                <a href="{% url 'dashboard' %}?section=settings" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-colors text-gray-600 hover:bg-gray-50 hover:text-gray-900">
+                    <span class="mr-3 text-lg">⚙️</span> Settings
+                </a>
+            </nav>
+        </div>
+    </aside>
+
+    <main class="flex-1 md:ml-64 p-8 transition-all dark:bg-gray-900">
+        <div class="max-w-7xl mx-auto">
+            {% block teacher_content %}{% endblock %}
+        </div>
+    </main>
+</div>
+{% endblock %}

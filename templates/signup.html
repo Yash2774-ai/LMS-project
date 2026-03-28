@@ -1,0 +1,164 @@
+{% extends 'base.html' %}
+
+{% block title %}Sign Up | Adaptive Learning LMS{% endblock %}
+
+{% block content %}
+<!-- Main Container: Full viewport height, flex center -->
+<div class="h-screen w-full bg-blue-50 flex items-center justify-center p-4 overflow-hidden font-sans">
+
+    <!-- Card: Fixed height to fit screen, slightly taller than login but constrained -->
+    <div
+        class="bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col md:flex-row w-full max-w-4xl h-[600px] relative">
+
+        <!-- Left Panel (Form) -->
+        <div class="md:w-1/2 bg-white flex flex-col items-center relative p-6 md:p-8 order-2 md:order-1">
+
+            <!-- Toggle -->
+            <div class="absolute top-5 left-0 right-0 flex justify-center z-20">
+                <div class="bg-gray-100 p-1 rounded-full flex shadow-inner">
+                    <label for="role_student" id="btn_student"
+                        class="cursor-pointer px-5 py-1.5 rounded-full text-xs font-bold bg-blue-600 text-white shadow-md transition-all select-none">Student</label>
+                    <label for="role_teacher" id="btn_teacher"
+                        class="cursor-pointer px-5 py-1.5 rounded-full text-xs font-bold text-gray-500 hover:bg-gray-200 transition-all select-none">Teacher</label>
+                </div>
+            </div>
+
+            <!-- Form Container -->
+            <div class="w-full max-w-xs mt-10 flex flex-col justify-center h-full relative z-10">
+
+                <div class="bg-blue-600 text-white py-2 rounded-t-xl shadow-lg mb-3 text-center mx-auto w-3/4">
+                    <h2 class="text-lg font-black tracking-wider uppercase">SIGN UP</h2>
+                </div>
+
+                <form class="space-y-2.5" action="" method="POST">
+                    {% csrf_token %}
+
+                    {% if form.errors %}
+                    <div class="bg-red-50 border-l-4 border-red-500 p-1.5 rounded-r-lg">
+                        {% for error in form.non_field_errors %}
+                        <p class="text-xs text-red-700 font-bold">{{ error }}</p>
+                        {% endfor %}
+                        {% for field in form %}
+                        {% for error in field.errors %}
+                        <p class="text-xs text-red-700 font-bold">{{ field.label }}: {{ error }}</p>
+                        {% endfor %}
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    <div>
+                        <input name="full_name" type="text" required placeholder="Full Name"
+                            value="{{ form.full_name.value|default:'' }}"
+                            class="appearance-none block w-full px-4 py-2 border-2 border-gray-100 rounded-lg placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-0 transition bg-gray-50 text-gray-900 font-medium text-sm">
+                    </div>
+
+                    <div>
+                        <input name="email" type="email" required placeholder="Email Address"
+                            value="{{ form.email.value|default:'' }}"
+                            class="appearance-none block w-full px-4 py-2 border-2 border-gray-100 rounded-lg placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-0 transition bg-gray-50 text-gray-900 font-medium text-sm">
+                    </div>
+
+                    <!-- Hidden password input removed -->
+
+
+                    <div class="flex gap-2">
+                        <div class="w-1/2">
+                            <input name="password1" type="password" required placeholder="Password"
+                                class="appearance-none block w-full px-4 py-2 border-2 border-gray-100 rounded-lg placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-0 transition bg-gray-50 text-gray-900 font-medium text-sm">
+                        </div>
+                        <div class="w-1/2">
+                            <input name="password2" type="password" required placeholder="Confirm"
+                                class="appearance-none block w-full px-4 py-2 border-2 border-gray-100 rounded-lg placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-0 transition bg-gray-50 text-gray-900 font-medium text-sm">
+                        </div>
+                    </div>
+
+                    <!-- Hidden Role Inputs -->
+                    <div class="hidden">
+                        {% for radio in form.role %}
+                        <div class="role-radio-option">
+                            {{ radio.tag }}
+                            <label for="{{ radio.id_for_label }}">{{ radio.choice_label }}</label>
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    <button type="submit"
+                        class="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-lg shadow-md text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 focus:outline-none transform hover:-translate-y-0.5 transition duration-200 mt-2">
+                        Create Account
+                    </button>
+                </form>
+
+                <div class="mt-3 text-center">
+                    <p class="text-gray-500 font-medium text-xs">
+                        Member already?
+                        <a href="{% url 'login' %}" class="font-bold text-blue-600 hover:text-blue-800 underline">Login
+                            here</a>
+                    </p>
+                </div>
+            </div>
+            <!-- Character Decoration -->
+            <div class="absolute -left-2 -bottom-2 w-28 pointer-events-none hidden md:block opacity-90">
+                <div
+                    class="text-[7rem] leading-none select-none filter hover:brightness-110 transition transform scale-x-[-1]">
+                    👦</div>
+            </div>
+        </div>
+
+        <!-- Right Panel (Illustration) -->
+        <div
+            class="md:w-1/2 bg-blue-100 flex flex-col items-center justify-center relative overflow-hidden order-1 md:order-2 p-6">
+            <!-- Decorative Elements -->
+            <div class="absolute top-0 left-0 w-full h-full bg-blue-100">
+                <div class="absolute top-[-20px] right-[-20px] w-32 h-32 bg-green-300 rounded-full opacity-40 blur-2xl">
+                </div>
+                <div
+                    class="absolute bottom-[-20px] left-[-20px] w-40 h-40 bg-pink-300 rounded-full opacity-40 blur-2xl">
+                </div>
+            </div>
+
+            <!-- Content -->
+            <div class="relative z-10 text-center">
+                <div class="text-8xl mb-4 drop-shadow-md transform hover:rotate-6 transition duration-300">👋</div>
+                <h2 class="text-3xl font-extrabold text-blue-900 mb-2 leading-tight">Hello,<br>Friend!</h2>
+                <p class="text-blue-700 font-medium text-sm px-4">New here? Join us today.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Role Toggle Logic
+    const btnStudent = document.getElementById('btn_student');
+    const btnTeacher = document.getElementById('btn_teacher');
+
+    function selectRole(role) {
+        const radios = document.getElementsByName('role');
+        radios.forEach(r => {
+            if (r.value === role) {
+                r.checked = true;
+            }
+        });
+
+        if (role === 'student') {
+            btnStudent.classList.add('bg-blue-600', 'text-white');
+            btnStudent.classList.remove('text-gray-500', 'hover:bg-gray-200');
+            btnTeacher.classList.remove('bg-blue-600', 'text-white');
+            btnTeacher.classList.add('text-gray-500', 'hover:bg-gray-200');
+        } else {
+            btnTeacher.classList.add('bg-blue-600', 'text-white');
+            btnTeacher.classList.remove('text-gray-500', 'hover:bg-gray-200');
+            btnStudent.classList.remove('bg-blue-600', 'text-white');
+            btnStudent.classList.add('text-gray-500', 'hover:bg-gray-200');
+        }
+    }
+
+    if (btnStudent && btnTeacher) {
+        btnStudent.addEventListener('click', () => selectRole('student'));
+        btnTeacher.addEventListener('click', () => selectRole('teacher'));
+    }
+
+
+</script>
+{% endblock %}
+
+{% block footer %}{% endblock %}

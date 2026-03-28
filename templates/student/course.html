@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-2xl font-bold text-gray-900 mb-6">Course Modules</h1>
+
+        {% if sections %}
+            <div class="space-y-4" id="accordion">
+                {% for section_name, data in sections.items %}
+                    {% with percent=data.percent|default:0 modules=data.modules section_id=forloop.counter %}
+                    <div class="bg-white rounded-xl shadow border border-gray-100 overflow-hidden">
+                        <button type="button"
+                                class="w-full flex items-center justify-between px-5 py-4 hover:bg-gray-50 transition"
+                                data-accordion-toggle>
+                            <div class="flex items-center space-x-3">
+                                <span class="text-xl">
+                                    {% if section_name == "Video" or section_name == "Section 1" %}🎥{% elif section_name == "Theory" or section_name == "Section 2" %}📘{% elif section_name == "Quiz" or section_name == "Section 3" %}📝{% elif section_name == "Assignment" or section_name == "Section 4" %}📂{% else %}📁{% endif %}
+                                </span>
+                                <div class="text-left">
+                                    <p class="text-base font-semibold text-gray-900">
+                                        {% if section_name == "Section 1" %}Video{% elif section_name == "Section 2" %}Theory{% elif section_name == "Section 3" %}Quiz{% elif section_name == "Section 4" %}Assignment{% else %}{{ section_name }}{% endif %}
+                                    </p>
+                                    <p class="text-sm text-gray-500">Click to view modules</p>
+                                </div>
+                            </div>
+                            <svg class="h-5 w-5 text-gray-500 transition-transform duration-200" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.21 8.29a.75.75 0 01.02-1.08z" clip-rule="evenodd" />
+                            </svg>
+
+                            <div class="mt-3 w-full">
+                                <div class="w-full bg-gray-200 rounded-full h-2.5 overflow-hidden">
+                                    <div class="bg-green-500 h-2.5" style="width: {{ percent|floatformat:0 }}%; transition: width 0.3s ease;"></div>
+                                </div>
+                                <p class="text-xs text-gray-500 mt-1">{{ percent|floatformat:0 }}% completed</p>
+                            </div>
+                        </button>
+
+                        <div class="accordion-panel overflow-hidden border-t border-gray-100" 
+                             style="max-height: 5000px; transition: max-height 0.3s ease-out;">
+                            <div class="divide-y divide-gray-100">
+                                {% for item in modules %}
+                                    <div class="flex items-center justify-between px-5 py-4 hover:bg-gray-50 transition">
+                                        <div class="flex items-center space-x-3 flex-1">
+                                            <span class="text-lg">
+                                                {% if item.module.module_type == "video" %}🎥{% elif item.module.module_type == "theory" %}📘{% elif item.module.module_type == "quiz" %}📝{% elif item.module.module_type == "checkpoint" %}📂{% else %}📁{% endif %}
+                                            </span>
+                                            <div class="flex-1">
+                                                <div class="flex items-center gap-2">
+                                                    <p class="text-sm font-semibold text-gray-900">{{ item.module.name }}</p>
+                                                    
+                                                    {% if item.module.module_type == "video" %}
+                                                        {% if item.module.mpd_url %}
+                                                            <span class="inline-block px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                                                ✓ Ready
+                                                            </span>
+                                                        {% else %}
+                                                            <span class="inline-block px-2 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
+                                                                ⏳ Not Uploaded
+                                                            </span>
+                                                        {% endif %}
+                                                    {% endif %}
+                                                </div>
+                                                <p class="text-xs text-gray-500 uppercase tracking-wide">{{ item.module.module_type|default:"Module" }}</p>
+                                            </div>
+                                        </div>
+                                        <div class="flex items-center space-x-3">
+                                            {% if item.is_completed %}
+                                                <span class="text-green-600 text-sm font-semibold flex items-center space-x-1">
+                                                    <span>✔</span><span>Completed</span>
+                                                </span>
+                                            {% elif item.is_unlocked %}
+                                                <span class="text-blue-500 text-sm flex items-center space-x-1">
+                                                    <span>🔓</span><span>Open</span>
+                                                </span>
+                                            {% else %}
+                                                <span class="text-gray-400 text-sm flex items-center space-x-1">
+                                                    <span>🔒</span><span>Locked</span>
+                                                </span>
+                                            {% endif %}
+
+                                            {% if item.is_unlocked %}
+                                                {% if item.module.module_type == "video" %}
+                                                    {% if item.module.mpd_url %}
+                                                    <a href="{% url 'student_player' item.module.id %}"
+                                                       class="inline-flex items-center px-4 py-2 rounded-lg bg-green-500 hover:bg-green-600 text-white text-sm font-medium transition">
+                                                        ▶ Watch Video
+                                                    </a>
+                                                    {% else %}
+                                                    <span class="inline-flex items-center px-4 py-2 rounded-lg bg-gray-300 text-gray-600 text-sm font-medium cursor-not-allowed" title="Video not uploaded yet">
+                                                        ⏳ Not Available
+                                                    </span>
+                                                    {% endif %}
+                                                {% else %}
+                                                    <a href="{% url 'student_player' item.module.id %}"
+                                                       class="inline-flex items-center px-4 py-2 rounded-lg bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium transition">
+                                                        Open →
+                                                    </a>
+                                                {% endif %}
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endwith %}
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="text-gray-500">No modules are available for this course yet.</p>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('[data-accordion-toggle]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const panel = btn.nextElementSibling;
+            const chevron = btn.querySelector('svg');
+            
+            if (panel.style.maxHeight === '0px') {
+                panel.style.maxHeight = '5000px';
+                if (chevron) chevron.style.transform = 'rotate(0deg)';
+            } else {
+                panel.style.maxHeight = '0px';
+                if (chevron) chevron.style.transform = 'rotate(180deg)';
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,144 @@
+{% extends 'base.html' %}
+
+{% block title %}Login | Adaptive Learning LMS{% endblock %}
+
+{% block content %}
+<!-- Main Container: Full viewport height, flex center, hidden overflow to prevent scrollbars -->
+<div class="h-screen w-full bg-blue-50 flex items-center justify-center p-4 overflow-hidden font-sans">
+
+    <!-- Card: Fixed height on desktop to ensure compactness, auto on mobile -->
+    <div
+        class="bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col md:flex-row w-full max-w-4xl h-[550px] relative">
+
+        <!-- Left Panel (Illustration) -->
+        <div class="md:w-1/2 bg-blue-100 flex flex-col items-center justify-center relative overflow-hidden p-6">
+            <!-- Decorative Elements -->
+            <div class="absolute top-0 left-0 w-full h-full bg-blue-100">
+                <div class="absolute top-[-20px] left-[-20px] w-32 h-32 bg-yellow-300 rounded-full opacity-40 blur-2xl">
+                </div>
+                <div
+                    class="absolute bottom-[-20px] right-[-20px] w-40 h-40 bg-purple-300 rounded-full opacity-40 blur-2xl">
+                </div>
+            </div>
+
+            <!-- Content -->
+            <div class="relative z-10 text-center">
+                <div class="text-7xl mb-4 drop-shadow-md transform hover:scale-110 transition duration-300">🎒</div>
+                <h2 class="text-3xl font-extrabold text-blue-900 mb-2 leading-tight">Welcome<br>Back!</h2>
+                <p class="text-blue-700 font-medium text-sm px-4">Ready to unlock new knowledge?</p>
+            </div>
+        </div>
+
+        <!-- Right Panel (Login Form) -->
+        <div class="md:w-1/2 bg-white flex flex-col items-center relative p-6 md:p-8">
+
+            <!-- Student/Teacher Toggle -->
+            <!-- Student/Teacher Toggle -->
+            <div class="absolute top-6 left-0 right-0 flex justify-center z-20">
+                <div class="bg-gray-100 p-1 rounded-full flex shadow-inner">
+                    <button type="button" id="toggle-student"
+                        class="px-5 py-1.5 rounded-full text-xs font-bold bg-blue-600 text-white shadow-md transition-all">Student</button>
+                    <button type="button" id="toggle-teacher"
+                        class="px-5 py-1.5 rounded-full text-xs font-bold text-gray-500 hover:bg-gray-200 transition-all">Teacher</button>
+                </div>
+            </div>
+
+            <!-- Form Container - Centered vertically via flex in parent, but we add margin-top to account for toggle -->
+            <div class="w-full max-w-xs mt-12 flex flex-col justify-center h-full">
+
+                <div class="bg-blue-600 text-white py-2 rounded-t-xl shadow-lg mb-4 text-center mx-auto w-3/4">
+                    <h2 class="text-lg font-black tracking-wider uppercase">LOG IN</h2>
+                </div>
+
+                <form class="space-y-3" action="#" method="POST">
+                    {% csrf_token %}
+                    <input type="hidden" name="role" id="user-role" value="student">
+
+                    {% if messages %}
+                    {% for message in messages %}
+                    <div class="bg-red-50 border-l-4 border-red-500 p-2 rounded-r-lg">
+                        <p class="text-xs text-red-700 font-bold">{{ message }}</p>
+                    </div>
+                    {% endfor %}
+                    {% endif %}
+
+                    <div>
+                        <label for="id_username" class="sr-only">Email</label>
+                        <input id="id_username" name="username" type="text" required placeholder="Email Address"
+                            class="appearance-none block w-full px-4 py-2.5 border-2 border-gray-100 rounded-lg placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-0 transition bg-gray-50 text-gray-900 font-medium text-sm">
+                    </div>
+
+                    <div class="relative">
+                        <label for="id_password" class="sr-only">Password</label>
+                        <input id="id_password" name="password" type="password" required placeholder="Password"
+                            class="appearance-none block w-full px-4 py-2.5 border-2 border-gray-100 rounded-lg placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-0 transition bg-gray-50 text-gray-900 font-medium text-sm">
+                        <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                            <span class="text-gray-400 text-xs">🔒</span>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-end">
+                        <a href="#" class="text-xs font-bold text-blue-600 hover:text-blue-800">Forgot Password?</a>
+                    </div>
+
+                    <button type="submit"
+                        class="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-lg shadow-md text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 focus:outline-none transform hover:-translate-y-0.5 transition duration-200">
+                        Log In
+                    </button>
+                </form>
+
+                <div class="mt-4 text-center">
+                    <p class="text-gray-500 font-medium text-xs">
+                        New here?
+                        <a href="{% url 'signup' %}"
+                            class="font-bold text-blue-600 hover:text-blue-800 underline">Create Account</a>
+                    </p>
+                </div>
+            </div>
+
+            <!-- Character Decoration (Positioned absolutely at bottom right) -->
+            <div class="absolute -right-2 -bottom-2 w-28 pointer-events-none hidden md:block opacity-90">
+                <div id="role-emoji"
+                    class="text-[7rem] leading-none select-none filter hover:brightness-110 transition">👩‍🎓</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const studentBtn = document.getElementById('toggle-student');
+    const teacherBtn = document.getElementById('toggle-teacher');
+    const roleInput = document.getElementById('user-role');
+    const roleEmoji = document.getElementById('role-emoji');
+
+    function setRole(role) {
+        roleInput.value = role;
+        if (role === 'student') {
+            studentBtn.classList.add('bg-blue-600', 'text-white', 'shadow-md');
+            studentBtn.classList.remove('text-gray-500', 'hover:bg-gray-200');
+
+            teacherBtn.classList.remove('bg-blue-600', 'text-white', 'shadow-md');
+            teacherBtn.classList.add('text-gray-500', 'hover:bg-gray-200');
+
+            roleEmoji.innerText = '👩‍🎓';
+        } else {
+            teacherBtn.classList.add('bg-blue-600', 'text-white', 'shadow-md');
+            teacherBtn.classList.remove('text-gray-500', 'hover:bg-gray-200');
+
+            studentBtn.classList.remove('bg-blue-600', 'text-white', 'shadow-md');
+            studentBtn.classList.add('text-gray-500', 'hover:bg-gray-200');
+
+            roleEmoji.innerText = '👨‍🏫';
+        }
+    }
+
+    studentBtn.addEventListener('click', () => setRole('student'));
+    teacherBtn.addEventListener('click', () => setRole('teacher'));
+
+    // Initialize with role from context if provided
+    var initialRole = "{{ role|default:'student' }}";
+    setRole(initialRole);
+</script>
+{% endblock %}
+
+{% block footer %}{% endblock %}

@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}About | Adaptive Learning LMS{% endblock %}
+
+{% block content %}
+<div class="bg-white">
+    <!-- About Hero -->
+    <div class="max-w-7xl mx-auto py-16 px-4 sm:py-24 sm:px-6 lg:px-8 text-center">
+        <h1 class="text-4xl font-extrabold text-gray-900 sm:text-5xl sm:tracking-tight lg:text-6xl">About Adaptive LMS
+        </h1>
+        <p class="max-w-3xl mt-5 mx-auto text-xl text-gray-500">
+            Adaptive Learning LMS is a modern platform built to transform the way students learn, teachers teach, and
+            institutions manage education.
+        </p>
+    </div>
+
+    <!-- Stats Section -->
+    <div class="bg-gray-50 pt-12 sm:pt-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="max-w-4xl mx-auto text-center">
+                <h2 class="text-3xl font-extrabold text-gray-900 sm:text-4xl">
+                    Trusted by learners worldwide
+                </h2>
+            </div>
+        </div>
+        <div class="mt-10 pb-12 sm:pb-16">
+            <div class="relative">
+                <div class="absolute inset-0 h-1/2 bg-gray-50"></div>
+                <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="max-w-4xl mx-auto">
+                        <dl class="rounded-lg bg-white shadow-lg sm:grid sm:grid-cols-4">
+                            <div class="flex flex-col border-b border-gray-100 p-6 text-center sm:border-0 sm:border-r">
+                                <dt class="order-2 mt-2 text-lg leading-6 font-medium text-gray-500">Active Students
+                                </dt>
+                                <dd class="order-1 text-4xl font-extrabold text-blue-600">500+</dd>
+                            </div>
+                            <div
+                                class="flex flex-col border-t border-b border-gray-100 p-6 text-center sm:border-0 sm:border-l sm:border-r">
+                                <dt class="order-2 mt-2 text-lg leading-6 font-medium text-gray-500">Courses Available
+                                </dt>
+                                <dd class="order-1 text-4xl font-extrabold text-blue-600">120+</dd>
+                            </div>
+                            <div class="flex flex-col border-t border-gray-100 p-6 text-center sm:border-0 sm:border-l">
+                                <dt class="order-2 mt-2 text-lg leading-6 font-medium text-gray-500">Expert Teachers
+                                </dt>
+                                <dd class="order-1 text-4xl font-extrabold text-blue-600">50+</dd>
+                            </div>
+                            <div class="flex flex-col border-t border-gray-100 p-6 text-center sm:border-0 sm:border-l">
+                                <dt class="order-2 mt-2 text-lg leading-6 font-medium text-gray-500">Secure Learning
+                                </dt>
+                                <dd class="order-1 text-4xl font-extrabold text-blue-600">100%</dd>
+                            </div>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mission Section -->
+    <div class="relative py-20 bg-white overflow-hidden">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col lg:flex-row items-center justify-between gap-16">
+                <!-- Left Content: Heading + Text -->
+                <div class="w-full lg:w-1/2">
+                    <div class="flex items-center gap-4 mb-6">
+                        <img src="{% static 'images/mission_icon.png' %}" alt="Target Icon"
+                            class="h-10 w-10 md:h-12 md:w-12 object-contain">
+                        <h2 class="text-4xl font-extrabold text-gray-900 tracking-tight sm:text-5xl">
+                            Our Mission
+                        </h2>
+                    </div>
+
+                    <div class="mb-4">
+                        <p class="text-lg text-gray-500 mb-6 leading-relaxed">
+                            Our mission is to make learning smarter, interactive, and personalized. We help students
+                            progress step-by-step, unlock quizzes, and gain real skills.
+                        </p>
+                        <p class="text-lg text-gray-500 leading-relaxed">
+                            Teachers can easily upload modules, track student performance, and manage courses
+                            securely in one place.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Right Content: Team Illustration -->
+                <div class="w-full lg:w-1/2 flex justify-center lg:justify-end">
+                    <img class="w-full max-w-lg object-contain" src="{% static 'images/team_illustration.png' %}"
+                        alt="Team Illustration">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

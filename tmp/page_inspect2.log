@@ -1,0 +1,105 @@
+MOODLE_URL: http://localhost/moodle/webservice/rest/server.php
+MOODLE_TOKEN (first 10): 86937f5bd7
+
+=== core_course_get_contents (filter page) ===
+Found module 74:
+{
+  "id": 74,
+  "url": "http://localhost/moodle/mod/page/view.php?id=74",
+  "name": "Intro",
+  "instance": 34,
+  "contextid": 90,
+  "visible": 1,
+  "uservisible": true,
+  "visibleoncoursepage": 1,
+  "modicon": "http://localhost/moodle/theme/image.php/boost/page/1774429753/monologo?filtericon=1",
+  "modname": "page",
+  "purpose": "content",
+  "branded": false,
+  "modplural": "Pages",
+  "availability": null,
+  "indent": 0,
+  "onclick": "",
+  "afterlink": null,
+  "customdata": "\"\"",
+  "noviewlink": false,
+  "completion": 0,
+  "downloadcontent": 1,
+  "dates": [],
+  "groupmode": 0,
+  "contents": [
+    {
+      "type": "file",
+      "filename": "index.html",
+      "filepath": "/",
+      "filesize": 0,
+      "fileurl": "http://localhost/moodle/webservice/pluginfile.php/90/mod_page/content/index.html?forcedownload=1",
+      "timecreated": null,
+      "timemodified": 1774684628,
+      "sortorder": 1,
+      "userid": null,
+      "author": null,
+      "license": null
+    }
+  ],
+  "contentsinfo": {
+    "filescount": 1,
+    "filessize": 0,
+    "lastmodified": 1774684628,
+    "mimetypes": [],
+    "repositorytype": ""
+  }
+}
+
+=== All module details from core_course_get_contents ===
+FULL MOD 74 RAW:
+{
+  "id": 74,
+  "url": "http://localhost/moodle/mod/page/view.php?id=74",
+  "name": "Intro",
+  "instance": 34,
+  "contextid": 90,
+  "visible": 1,
+  "uservisible": true,
+  "visibleoncoursepage": 1,
+  "modicon": "http://localhost/moodle/theme/image.php/boost/page/1774429753/monologo?filtericon=1",
+  "modname": "page",
+  "purpose": "content",
+  "branded": false,
+  "modplural": "Pages",
+  "availability": null,
+  "indent": 0,
+  "onclick": "",
+  "afterlink": null,
+  "customdata": "\"\"",
+  "noviewlink": false,
+  "completion": 0,
+  "downloadcontent": 1,
+  "dates": [],
+  "groupmode": 0,
+  "contents": [
+    {
+      "type": "file",
+      "filename": "index.html",
+      "filepath": "/",
+      "filesize": 0,
+      "fileurl": "http://localhost/moodle/webservice/pluginfile.php/90/mod_page/content/index.html?forcedownload=1",
+      "timecreated": null,
+      "timemodified": 1774684628,
+      "sortorder": 1,
+      "userid": null,
+      "author": null,
+      "license": null
+    }
+  ],
+  "contentsinfo": {
+    "filescount": 1,
+    "filessize": 0,
+    "lastmodified": 1774684628,
+    "mimetypes": [],
+    "repositorytype": ""
+  }
+}
+
+=== mod_page_get_pages_by_courses raw response ===
+'{"exception":"webservice_access_exception","errorcode":"accessexception","message":"Access control exception (Access to the function mod_page_get_pages_by_courses() is not allowed.\\n                     There could be multiple reasons for this:\\n                     1. The service linked to the user token does not contain the function.\\n                     2. The service is user-restricted and the user is not listed.\\n                     3. The service is IP-restricted and the user IP is not listed.\\n                     4. The service is time-restricted and the time has expired.\\n                     5. The token is time-restricted and the time has expired.\\n                     6. The service requires a specific capability which the user does not have.\\n                     7. The function is called with username\\/password (no user token is sent)\\n                     and none of the services has the function to allow the user.\\n                     These settings can be found in Administration > Site administration\\n                     > Server > Web services > External services and Manage tokens.)","debuginfo":"Access to the function mod_page_get_pages_by_courses() is not allowed.\\n                     There could be multiple reasons for this:\\n                     1. The service linked to the user token does not contain the function.\\n                     2. The service is user-restricted and the user is not listed.\\n                     3. The service is IP-restricted and the user IP is not listed.\\n                     4. The service is time-restricted and the time has expired.\\n                     5. The token is time-restricted and the time has expired.\\n                     6. The service requires a specific capability which the user does not have.\\n                     7. The function is called with username\\/password (no user token is sent)\\n                     and none of the services has the function to allow the user.\\n                     These '
